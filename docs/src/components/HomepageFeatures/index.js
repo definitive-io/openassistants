@@ -1,43 +1,48 @@
-import clsx from 'clsx';
-import Heading from '@theme/Heading';
-import styles from './styles.module.css';
+import clsx from "clsx";
+import Heading from "@theme/Heading";
+import styles from "./styles.module.css";
 
 const FeatureList = [
   {
-    title: 'Easy to Use',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    title: "Streamlined Function Deployment",
+    Svg: require("@site/static/img/streamlined_functions_light.svg").default,
     description: (
       <>
-        Docusaurus was designed from the ground up to be easily installed and
-        used to get your website up and running quickly.
+        OpenAssistants simplifies the integration of AI into your workflows.
+        Define your Python functions, and our framework does the rest,
+        seamlessly embedding advanced AI capabilities into your projects.
       </>
     ),
   },
   {
-    title: 'Focus on What Matters',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    title: "Focus on Innovation, Not Infrastructure",
+    Svg: require("@site/static/img/innovation_light.svg").default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go
-        ahead and move your docs into the <code>docs</code> directory.
+        OpenAssistants empowers you to concentrate on creating groundbreaking AI
+        functions, while it handles the intricate technicalities. Immerse
+        yourself in developing your project's core capabilities, and let the
+        framework manage the rest.
       </>
     ),
   },
   {
-    title: 'Powered by React',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    title: "Python-Powered Versatility",
+    Svg: require("@site/static/img/python_versatility_light.svg").default,
     description: (
       <>
-        Extend or customize your website layout by reusing React. Docusaurus can
-        be extended while reusing the same header and footer.
+        Leveraging Python's robustness, OpenAssistants offers a flexible and
+        powerful backend, adaptable to various tasks and workflows, from
+        database queries to automated emails, all within a consistent and
+        reliable framework.
       </>
     ),
   },
 ];
 
-function Feature({Svg, title, description}) {
+function Feature({ Svg, title, description }) {
   return (
-    <div className={clsx('col col--4')}>
+    <div className={clsx("col col--4")}>
       <div className="text--center">
         <Svg className={styles.featureSvg} role="img" />
       </div>
