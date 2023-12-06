@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "openassistants-fastapi"
+version = "0.0.1"
+description = ""
+authors = ["Rick Lamers <ricklamers@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+sse-starlette = "^1.8.2"
+fastapi = "^0.104.1"
+starlette = ">=0.27.0,<0.28.0"
+langchain = "^0.0.346"
+
+[tool.isort]
+profile = "black"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
