@@ -17,7 +17,7 @@ from openassistants.llm_function_calling.infilling import (
     generate_arguments,
 )
 from openassistants.llm_function_calling.selection import select_function
-from openassistants_fastapi.utils.sse import AsyncStreamVersion
+from openassistants.utils.async_utils import AsyncStreamVersion
 
 
 class Assistant:
@@ -31,9 +31,9 @@ class Assistant:
     def __init__(
         self,
         libraries: List[str],
-        function_identification: BaseChatModel = ChatOpenAI(model="gpt-4"),
-        function_infilling: BaseChatModel = ChatOpenAI(model="gpt-4"),
-        function_summarization: BaseChatModel = ChatOpenAI(model="gpt-4"),
+        function_identification: BaseChatModel = ChatOpenAI(model="gpt-3.5-turbo-16k"),
+        function_infilling: BaseChatModel = ChatOpenAI(model="gpt-3.5-turbo-16k"),
+        function_summarization: BaseChatModel = ChatOpenAI(model="gpt-3.5-turbo-16k"),
     ):
         self.function_identification = function_identification
         self.function_infilling = function_infilling

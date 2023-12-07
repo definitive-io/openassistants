@@ -10,7 +10,7 @@ parameters:
     properties: {}
     required: []
 type: DuckDBQueryFunction
-dataset: "example-data/"
+dataset: "dummy-data/"
 sqls:
 - |
   SELECT purchases.id, purchases.product, employees.email

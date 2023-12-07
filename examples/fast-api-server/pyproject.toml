@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "example"
+name = "fast-api-server"
 version = "0.0.1"
 description = ""
 authors = ["Rick Lamers <ricklamers@gmail.com>"]

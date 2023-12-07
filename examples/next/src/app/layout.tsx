@@ -1,7 +1,6 @@
 'use client';
 
 import { Inter } from 'next/font/google';
-import './globals.css';
 import '@openassistants/ui/tailwind-output.css';
 import { Providers } from '@openassistants/ui';
 
@@ -16,7 +15,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
     <html lang="en" suppressHydrationWarning>
       <body>
         <Providers defaultTheme="light" disableTransitionOnChange>
-          <main className="flex flex-col flex-1 bg-muted/50">{children}</main>
+          <main className="flex h-full flex-col flex-1 bg-muted/50">{children}</main>
         </Providers>
       </body>
     </html>

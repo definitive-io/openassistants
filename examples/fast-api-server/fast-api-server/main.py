@@ -6,7 +6,7 @@ from openassistants_fastapi.routes import RouteAssistants, create_router
 app = FastAPI()
 
 route_assistants = RouteAssistants(
-    assistants={"test": Assistant(libraries=["piedpiper"])}
+    assistants={"hooli": Assistant(libraries=["piedpiper"])}
 )
 
 api_router = create_router(route_assistants)

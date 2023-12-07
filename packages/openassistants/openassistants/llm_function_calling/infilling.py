@@ -6,17 +6,6 @@ from openassistants.data_models.chat_messages import opas_to_lc
 from openassistants.functions.base import BaseFunction
 from openassistants.llm_function_calling.utils import generate_to_json
 
-OUTPUT_FORMAT_INSTRUCTION = """The output should be formatted as a JSON instance that conforms to the JSON schema below. 
-
-As an example, for the schema {{"properties": {{"foo": {{"title": "Foo", "description": "a list of strings", "type": "array", "items": {{"type": "string"}}}}}}, "required": ["foo"]}}
-
-the object {{"foo": ["bar", "baz"]}} is a well-formatted instance of the schema. The object {{"properties": {{"foo": ["bar", "baz"]}}}} is not well-formatted.
-
-{schema}
-
-Always return a valid JSON object instance.
-"""
-
 
 async def generate_argument_decisions_schema(function: BaseFunction):
     # Start with the base schema
@@ -62,31 +51,24 @@ async def generate_argument_decisions(
     json_schema = await generate_argument_decisions_schema(function)
 
     history_messages = opas_to_lc(chat_history)[:-1]
-    final_messages = (
-        [
-            SystemMessage(
-                content=OUTPUT_FORMAT_INSTRUCTION.format(
-                    schema=json.dumps(json_schema, indent=4)
-                )
-            )
-        ]
-        + history_messages
-        + [
-            HumanMessage(
-                content=f"""We are analyzing the following function:
+
+    final_messages = history_messages + [
+        HumanMessage(
+            content=f"""We are analyzing the following function:
 {await function.get_signature()}
 
 User query: "{user_query}"
 
 For each of the arguments decide:
 - Should the argument be used?
-- Can we find the right value for the argument from the user query or from previous messages?
+- Can we find the right value for the argument from the user query or from previous messages? We need to be able to derive the full correct value for the argument without any additional information.
 """
-            )
-        ]
-    )
+        )
+    ]
 
-    result = await generate_to_json(chat, final_messages)
+    result = await generate_to_json(
+        chat, final_messages, json_schema, "generate_argument_decisions"
+    )
 
     return result
 
@@ -98,28 +80,20 @@ async def generate_arguments(
 
     history_messages = opas_to_lc(chat_history)[:-1]
 
-    final_messages = (
-        [
-            SystemMessage(
-                content=OUTPUT_FORMAT_INSTRUCTION.format(
-                    schema=json.dumps(json_schema, indent=4)
-                )
-            )
-        ]
-        + history_messages
-        + [
-            HumanMessage(
-                content=f"""We want to invoke the following function:
+    final_messages = history_messages + [
+        HumanMessage(
+            content=f"""We want to invoke the following function:
 {await function.get_signature()}
 
 Provide the arguments for the function call that match the user query in JSON.
 
 User query: "{user_query}"
 """
-            ),
-        ]
-    )
+        ),
+    ]
 
-    result = await generate_to_json(chat, final_messages)
+    result = await generate_to_json(
+        chat, final_messages, json_schema, "generate_arguments"
+    )
 
     return result

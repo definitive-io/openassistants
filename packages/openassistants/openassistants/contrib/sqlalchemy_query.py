@@ -19,8 +19,8 @@ from openassistants.data_models.function_output import (
 from openassistants.data_models.serialized_dataframe import SerializedDataFrame
 from openassistants.functions.base import BaseFunction, FunctionExecutionDependency
 from openassistants.functions.visualize import execute_visualization
+from openassistants.utils.async_utils import AsyncStreamVersion
 from openassistants.utils.strings import resolve_str_template
-from openassistants_fastapi.utils.sse import AsyncStreamVersion
 from pydantic import Field, PrivateAttr
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
