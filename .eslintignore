@@ -1,0 +1,5 @@
+**/node_modules
+**/coverage
+**/.next
+src/cli/convert.test.ts
+**/*.mjs

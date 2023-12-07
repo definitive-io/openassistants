@@ -7,8 +7,8 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-openassistants = {path = "/Users/rick/workspace/openassistants/packages/openassistants", develop = true}
-openassistants-fastapi = {path = "/Users/rick/workspace/openassistants/packages/openassistants-fastapi", develop = true}
+openassistants = {path = "../packages/openassistants", develop = true}
+openassistants-fastapi = {path = "../packages/openassistants-fastapi", develop = true}
 fastapi = "^0.104.1"
 uvicorn = "^0.24.0.post1"
 
