@@ -3,6 +3,13 @@
 @tailwind utilities;
 
 @layer base {
+  body {
+    font-family: 'Inter', sans-serif;
+    height: 100%;
+  }
+  html {
+    height: 100%;
+  }
   :root {
     /* --background: 0 0% 100%; */
     --foreground: 0 0% 43.92%;

@@ -81,7 +81,7 @@ export function OpenAssistantsChat({
       : [];
 
   return (
-    <div className="flex flex-col flex-1 bg-background">
+    <div className="flex flex-col h-full flex-1 bg-background">
       <div className={cn('pb-[200px] pt-4 md:pt-10 flex-1 overflow-auto')}>
         {messages && (
           <OpenAssistantsChatList

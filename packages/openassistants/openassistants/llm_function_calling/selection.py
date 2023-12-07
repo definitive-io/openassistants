@@ -17,33 +17,20 @@ async def filter_functions(
     functions_text = "\n".join(
         await asyncio.gather(*[f.get_signature() for f in functions])
     )
+    json_schema = {
+        "type": "object",
+        "properties": {"function_name": {"type": "string"}},
+        "required": ["function_name"],
+    }
     messages = [
-        SystemMessage(
-            content="""The output should be formatted as a JSON instance that conforms to the JSON schema below. 
-
-As an example, for the schema {{"properties": {{"foo": {{"title": "Foo", "description": "a list of strings", "type": "array", "items": {{"type": "string"}}}}}}, "required": ["foo"]}}
-
-the object {{"foo": ["bar", "baz"]}} is a well-formatted instance of the schema. The object {{"properties": {{"foo": ["bar", "baz"]}}}} is not well-formatted.
-
-{
-    "type": "object", 
-    "properties": {
-        "function_name": {
-            "type": "string"
-        }
-    }, 
-    "required": ["function_name"]
-}
-
-Always return a valid JSON object instance. Do not generate function arguments.
-"""
-        ),
         HumanMessage(
             content=f"""{functions_text}\nWhich of these functions is most suitable given the user query: "{user_query}"?"""
         ),
     ]
 
-    function_names = (await generate_to_json(chat, messages)).get("function_name")
+    function_names = (
+        await generate_to_json(chat, messages, json_schema, "filter_functions")
+    ).get("function_name")
 
     return function_names
 
@@ -81,47 +68,38 @@ async def select_function(
         [await f.get_signature() for f in selected_functions]
     )
 
-    selection_messages = [
-        SystemMessage(
-            content="""The output should be formatted as a JSON instance that conforms to the JSON schema below.
-{
-  "type": "object",
-  "properties": {
-    "function_name": {
-      "type": "string"
-    },
-    "suggested_function_names": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
+    json_schema = {
+        "type": "object",
+        "properties": {
+            "function_name": {"type": "string"},
+            "suggested_function_names": {"type": "array", "items": {"type": "string"}},
+        },
+        "anyOf": [
+            {"required": ["function_name"]},
+            {"required": ["suggested_function_names"]},
+        ],
     }
-  },
-  "anyOf": [
-    {"required": ["function_name"]},
-    {"required": ["suggested_function_names"]}
-  ]
-}
 
-As an example, for the schema {{"properties": {{"foo": {{"title": "Foo", "description": "a list of strings", "type": "array", "items": {{"type": "string"}}}}}}, "required": ["foo"]}}
-
-the object {{"foo": ["bar", "baz"]}} is a well-formatted instance of the schema. The object {{"properties": {{"foo": ["bar", "baz"]}}}} is not well-formatted.
-
-Always return a valid JSON object instance.  Do not generate function arguments.
-"""
-        ),
+    selection_messages = [
         HumanMessage(
             content=f"""Prior selection reduced the candidates to these functions:
 {selected_functions_signatures}
 
-In case there is a function that is in exact match to the user query, provide the name of the function.
-In case no user query matches the function exactly, suggest a few functions that are most similar to the user query. You are also allowed to return an empty list of suggested functions if you think none of the functions are a good match.
+Scenario 1: There is a function in the list of candidates that is a match to the user query.
+Action: provide the name of the function as the 'function_name' argument.
+
+Scenario 2: None of the functions in the list of candidates match the user query. 
+Action: select related functions from the list of candidates as the 'suggested_function_names' argument. You are also allowed to return an empty list of suggested functions if you think none of the functions are a good match.
+
+First decide which of the two scenarios is the case. Then take the appropriate action.
 
 Given the user query: "{user_query}", which of these functions is the best match?"""
         ),
     ]
 
-    json_result = await generate_to_json(chat, selection_messages)
+    json_result = await generate_to_json(
+        chat, selection_messages, json_schema, "select_function"
+    )
 
     function_name = json_result.get("function_name")
     suggested_function_names = json_result.get("suggested_function_names", [])
