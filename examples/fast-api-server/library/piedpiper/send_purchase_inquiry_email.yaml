@@ -1,0 +1,23 @@
+name: send_purchase_inquiry_email
+display_name: Send purchase inquiry email
+description: |
+  send an inquiry email about a recent purchase to an employee
+sample_questions:
+  - send purchase inquiry email
+parameters:
+  json_schema:
+    type: object
+    properties:
+      to:
+        type: string
+        format: email
+        description: email address to send to
+    required:
+      - to
+type: PythonEvalFunction
+python_code: |
+  async def main(args: dict):
+    import asyncio
+    yield [{"type": "text", "text": "Sending email..."}]
+    await asyncio.sleep(2)
+    yield [{"type": "text", "text": f"Inquiry email about recent purchase sent to: {args.get('to')}"}]

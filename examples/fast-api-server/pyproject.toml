@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "example"
+version = "0.0.1"
+description = ""
+authors = ["Rick Lamers <ricklamers@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+openassistants = {path = "../../packages/openassistants", develop = true}
+openassistants-fastapi = {path = "../../packages/openassistants-fastapi", develop = true}
+fastapi = "^0.104.1"
+uvicorn = "^0.24.0.post1"
+
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.4.3"
+pytest-asyncio = "^0.23.2"
+
+[tool.isort]
+profile = "black"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
