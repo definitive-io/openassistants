@@ -1,5 +1,11 @@
 # OpenAssistants UI
 
-This is a placeholder until we place the React components/Next.js app here.
+## Playground
 
-Code owner: @colemccracken
+Visit this link to see what this looks like!
+
+## Local Playground
+
+Or you can run npm start from the root and visit http://localhost:3000
+
+## Sidekick Component
