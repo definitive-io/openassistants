@@ -88,14 +88,16 @@ class PyRepr(NodeRepr):
 
     @classmethod
     def repr_scalar(cls, scalar_node: ScalarNode) -> str:
-        mapping = {
+        mapping: Dict[str, Dict[Optional[str], str]] = {
             "string": {None: "str", "date-time": "datetime", "date": "date"},
             "integer": {None: "int"},
             "number": {None: "float"},
             "boolean": {None: "bool"},
         }
         type_mapping = mapping[scalar_node.scalar_type]
-        return type_mapping.get(scalar_node.scalar_format, type_mapping[None])  # type: ignore
+        return type_mapping.get(
+            scalar_node.scalar_format, type_mapping[None]
+        )  # type: ignore
 
     @classmethod
     def repr_optional(cls, node: Node) -> str:

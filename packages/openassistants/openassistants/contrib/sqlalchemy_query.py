@@ -73,8 +73,8 @@ class QueryFunction(BaseFunction):
         lc_messages.append(
             HumanMessage(
                 content=f"""\
-        To answer the previous question, I called a function: {self.id}({deps.arguments})
-        """
+To answer the previous question, I called a function: {self.id}({deps.arguments})
+"""
             )
         )
         lc_messages.append(
@@ -85,7 +85,7 @@ The following table answers the previous question:
 
 Some details about the table:
 {self.description}
-        
+
 Provide a summary based on the data.
 """
             )

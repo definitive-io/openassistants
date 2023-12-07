@@ -48,7 +48,7 @@ class LocalCRUD(FunctionCRUD):
                 parsed_yaml = yaml.load(yaml_file)
                 return TypeAdapter(AllFunctionTypes).validate_python(
                     parsed_yaml | {"id": function_id}
-                )
+                )  # type: ignore
             else:
                 return None
         except Exception as e:
@@ -56,7 +56,7 @@ class LocalCRUD(FunctionCRUD):
 
     async def aread_all(self) -> List[BaseFunction]:
         ids = self.list_ids()
-        return [self.read(f_id) for f_id in ids]
+        return [self.read(f_id) for f_id in ids]  # type: ignore
 
     def list_ids(self) -> List[str]:
         return [

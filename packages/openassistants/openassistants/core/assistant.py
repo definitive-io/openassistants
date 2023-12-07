@@ -160,7 +160,10 @@ class Assistant:
                 )
                 yield [
                     OpasAssistantMessage(
-                        content=f"No function matching that question was found. Did you mean: {suggested_functions_names}?"
+                        content=(
+                            f"No function matching that question was found. "
+                            f"Did you mean: {suggested_functions_names}?"
+                        )
                     )
                 ]
                 return
@@ -200,7 +203,7 @@ class Assistant:
             # request input
             request_user_input = OpasAssistantMessage(
                 content=f"""\
-    I found the function *{selected_function.display_name or selected_function.id}*. 
+    I found the function *{selected_function.display_name or selected_function.id}*.
     Please fill in the following parameters and I'll run it.
     """,
                 input_request=FunctionInputRequest(

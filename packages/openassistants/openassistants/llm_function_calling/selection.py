@@ -24,7 +24,8 @@ async def filter_functions(
     }
     messages = [
         HumanMessage(
-            content=f"""{functions_text}\nWhich of these functions is most suitable given the user query: "{user_query}"?"""
+            content=f"""{functions_text}
+Which of these functions is most suitable given the user query: "{user_query}"?"""
         ),
     ]
 
@@ -93,7 +94,7 @@ Action: select related functions from the list of candidates as the 'suggested_f
 
 First decide which of the two scenarios is the case. Then take the appropriate action.
 
-Given the user query: "{user_query}", which of these functions is the best match?"""
+Given the user query: "{user_query}", which of these functions is the best match?"""  # noqa: E501
         ),
     ]
 

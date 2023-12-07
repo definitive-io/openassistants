@@ -3,8 +3,8 @@ from io import StringIO
 from pathlib import Path
 from typing import Optional, TextIO
 
-from ruamel.yaml import YAML
-from ruamel.yaml.scalarstring import walk_tree
+from ruamel.yaml import YAML  # type: ignore
+from ruamel.yaml.scalarstring import walk_tree  # type: ignore
 
 
 def dump(data: dict, f=None) -> Optional[str]:

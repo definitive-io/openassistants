@@ -1,0 +1,9 @@
+[run]
+source = openassistants
+
+[report]
+fail_under = 80
+exclude_lines =
+    pragma: no cover
+    raise AssertionError
+    raise NotImplementedError

@@ -62,7 +62,7 @@ User query: "{user_query}"
 For each of the arguments decide:
 - Should the argument be used?
 - Can we find the right value for the argument from the user query or from previous messages? We need to be able to derive the full correct value for the argument without any additional information.
-"""
+"""  # noqa: E501
         )
     ]
 
