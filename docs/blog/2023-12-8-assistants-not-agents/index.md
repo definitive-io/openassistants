@@ -30,6 +30,7 @@ This is where AI assistants come into the limelight. Unlike their autonomous cou
 That's where `openassistants` comes in. We aim to make it easier to develop robust assistants that rely on function calling for performing actions and retrieving information into a conversational context. With a human in the loop these systems can be _useful_ and _reliable_. Our goal is to make the process of building robust assistants as easy as possible by putting as much boilerplate and common components into a set of extensible and composible libraries.
 
 We're launching with three packages:
+
 - `openassistants` the core library responsible for the main function calling / message generating runtime
 - `openassistants-fastapi` a set of FastAPI routes used for interacting with the core runtime loop through a REST API
 - `openassistants-ui` an example chat client that supports rich streaming outputs like tables, plots, form inputs and text.
