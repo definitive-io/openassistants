@@ -16,9 +16,8 @@ const config = {
   baseUrl: '/openassistants/',
 
   // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'definitive-io', // Usually your GitHub org/user name.
-  projectName: 'openassistants', // Usually your repo name.
+  organizationName: 'definitive-io',
+  projectName: 'openassistants',
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
