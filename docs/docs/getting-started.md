@@ -6,8 +6,8 @@ sidebar_position: 1
 
 Let's discover **OpenAssistants in less than 5 minutes**.
 
+## Step 1: A simple FastAPI server based on OpenAssistants
 
-## Step 1:  A simple FastAPI server based on OpenAssistants
 See [code example](https://github.com/definitive-io/openassistants/blob/main/examples/fast-api-server/fast_api_server/main.py)
 
 ```python
@@ -38,6 +38,7 @@ A FastAPI server can define multiple assistants, which one is used can be specif
 Functions are defined as YAML files in a folder (this is what we refer to as a "library" of functions). An assistant can consume multiple libraries to be able to use all functions defined across them.
 
 A single function inside `library/piedpiper`:
+
 ```yaml
 name: send_purchase_inquiry_email
 display_name: Send purchase inquiry email
@@ -69,6 +70,7 @@ python_code: |
 Once the functions have been defined we can connect to the REST API using the default UI client.
 
 Simply start the Next.js app that points to the REST endpoint:
+
 ```bash
 cd examples/next
 yarn run dev
