@@ -3,6 +3,11 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from langchain.chat_models.base import BaseChatModel
 from langchain.chat_models.openai import ChatOpenAI
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.embeddings.base import Embeddings
+from langchain.schema import BaseStore
+from langchain.storage import LocalFileStore
+
 
 from openassistants.data_models.chat_messages import (
     OpasAssistantMessage,
@@ -13,12 +18,14 @@ from openassistants.data_models.chat_messages import (
 from openassistants.data_models.function_input import FunctionCall, FunctionInputRequest
 from openassistants.functions.base import BaseFunction, FunctionExecutionDependency
 from openassistants.functions.crud import FunctionCRUD, LocalCRUD
+from openassistants.llm_function_calling.entity_resolution import resolve_entities
 from openassistants.llm_function_calling.infilling import (
     generate_argument_decisions,
     generate_arguments,
 )
 from openassistants.llm_function_calling.selection import select_function
 from openassistants.utils.async_utils import AsyncStreamVersion
+from openassistants.utils.langchain_util import LangChainCachedEmbeddings
 
 
 class Assistant:
@@ -35,6 +42,7 @@ class Assistant:
         function_identification: BaseChatModel = ChatOpenAI(model="gpt-3.5-turbo-16k"),
         function_infilling: BaseChatModel = ChatOpenAI(model="gpt-3.5-turbo-16k"),
         function_summarization: BaseChatModel = ChatOpenAI(model="gpt-3.5-turbo-16k"),
+        entity_embedding_model: Embeddings = LangChainCachedEmbeddings(OpenAIEmbeddings()),
     ):
         self.function_identification = function_identification
         self.function_infilling = function_infilling
@@ -83,6 +91,7 @@ class Assistant:
         message: OpasUserMessage,
         selected_function: BaseFunction,
         args_json_schema: dict,
+        entities_info: str,
     ) -> Tuple[bool, dict]:
         # Perform infilling and generate argument decisions in parallel
         arguments_future = asyncio.create_task(
@@ -91,6 +100,7 @@ class Assistant:
                 self.function_infilling,
                 message.content,
                 dependencies.get("chat_history"),
+                entities_info,
             )
         )
         argument_decisions_future = asyncio.create_task(
@@ -140,6 +150,7 @@ class Assistant:
         force_select_function: Optional[str],
     ) -> AsyncStreamVersion[List[OpasMessage]]:
         selected_function: Optional[BaseFunction] = None
+        selected_function_args: Optional[Dict[str, Any]] = None
 
         # Perform function selection
         if force_select_function is not None:
@@ -148,6 +159,7 @@ class Assistant:
                 raise ValueError("function not found")
             selected_function = filtered[0]
 
+
         if selected_function is None:
             function_selection = await select_function(
                 self.function_identification, all_functions, message.content
@@ -155,6 +167,7 @@ class Assistant:
 
             if function_selection.function:
                 selected_function = function_selection.function
+                selected_function_args = function_selection.function_args
             elif function_selection.suggested_functions:
                 suggested_functions_names = ", ".join(
                     [
@@ -183,6 +196,12 @@ class Assistant:
             await selected_function.get_parameters_json_schema()
         )
 
+        # perform entity resolution
+        entities_info = await resolve_entities(
+            selected_function, selected_function_args or {}
+        )
+
+
         # perform argument infilling
         if len(selected_function_arg_json_schema["properties"]) > 0:
             complete, arguments = await self.do_infilling(
@@ -190,6 +209,7 @@ class Assistant:
                 message,
                 selected_function,
                 selected_function_arg_json_schema,
+                entities_info,
             )
         else:
             complete, arguments = True, {}

@@ -1,11 +1,12 @@
-from typing import Dict, TypedDict
+from typing import Dict, List, TypedDict
 
 from langchain.schema.messages import HumanMessage
 
-from openassistants.data_models.chat_messages import opas_to_lc
+from openassistants.data_models.chat_messages import OpasUserMessage, opas_to_lc
 from openassistants.functions.base import BaseFunction
 from openassistants.llm_function_calling.utils import generate_to_json
 
+from langchain.chat_models.base import BaseChatModel
 
 async def generate_argument_decisions_schema(function: BaseFunction):
     # Start with the base schema
@@ -74,7 +75,11 @@ For each of the arguments decide:
 
 
 async def generate_arguments(
-    function: BaseFunction, chat, user_query, chat_history
+    function: BaseFunction,
+    chat: BaseChatModel,
+    user_query: str,
+    chat_history: List[OpasUserMessage],
+    entities_info: str,
 ) -> dict:
     json_schema = await function.get_parameters_json_schema()
 
@@ -86,6 +91,8 @@ async def generate_arguments(
 {await function.get_signature()}
 
 Provide the arguments for the function call that match the user query in JSON.
+
+{entities_info}
 
 User query: "{user_query}"
 """
