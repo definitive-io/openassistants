@@ -1,5 +1,6 @@
 from typing import Sequence
 
+import anyio
 import pandas as pd
 
 from openassistants.contrib.python_callable import PythonCallableFunction
@@ -13,7 +14,7 @@ async def _execute(deps: FunctionExecutionDependency) -> AsyncStreamVersion[Sequ
     name = deps.arguments["name"]
 
     # load csv
-    df = pd.read_csv("dummy-data/employees.csv")
+    df = await anyio.to_thread.run_sync(pd.read_csv, "dummy-data/employees.csv")
 
     # find email where csv.name == name
     email = df[df["name"] == name]["email"].iloc[0]
@@ -22,11 +23,10 @@ async def _execute(deps: FunctionExecutionDependency) -> AsyncStreamVersion[Sequ
 
 
 async def _get_entity_configs() -> dict[str, BaseFunctionEntityConfig]:
-    df = pd.read_csv("dummy-data/employees.csv")
-    records = df[["name"]].to_json(index=False, orient="records")
+    df = await anyio.to_thread.run_sync(pd.read_csv, "dummy-data/employees.csv")
     return {
         "name": BaseFunctionEntityConfig(
-            entities=records,
+            entities=df[["name"]].to_dict("records"),
         )
     }
 
