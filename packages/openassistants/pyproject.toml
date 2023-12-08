@@ -15,9 +15,7 @@ jsonschema = "^4.20.0"
 sqlalchemy = "^2.0.23"
 openai = "^1.3.7"
 pyyaml = "^6.0.1"
-
-[tool.poetry.extras]
-duckdb = ["duckdb-engine"]
+duckdb-engine = "^0.9.3"
 
 [tool.poetry.group.test.dependencies]
 black = "^23.11.0"

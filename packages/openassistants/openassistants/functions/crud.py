@@ -46,7 +46,8 @@ class LocalCRUD(FunctionCRUD):
     def read(self, function_id: str) -> Optional[BaseFunction]:
         try:
             if (yaml_file := self.directory / f"{function_id}.yaml").exists():
-                parsed_yaml = yaml.load(yaml_file)
+                with yaml_file.open() as f:
+                    parsed_yaml = yaml.load(f)
                 return TypeAdapter(AllFunctionTypes).validate_python(
                     parsed_yaml | {"id": function_id}
                 )  # type: ignore

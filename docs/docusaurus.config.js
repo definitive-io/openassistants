@@ -8,8 +8,8 @@ import { themes as prismThemes } from "prism-react-renderer";
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: "Open Assistants",
-  tagline: "Open Assistants",
+  title: "OpenAssistants",
+  tagline: "OpenAssistants",
   favicon: "img/definitive.ico",
 
   // Set the production url of your site here
@@ -64,9 +64,9 @@ const config = {
       // Replace with your project's social card
       image: "img/docusaurus-social-card.jpg",
       navbar: {
-        title: "Definitive Open Assistants",
+        title: "OpenAssistants",
         logo: {
-          alt: "My Site Logo",
+          alt: "Definitive logo",
           src: "img/logo.svg",
         },
         items: [
@@ -74,7 +74,7 @@ const config = {
             type: "docSidebar",
             sidebarId: "tutorialSidebar",
             position: "left",
-            label: "Tutorial",
+            label: "Docs",
           },
           { to: "/blog", label: "Blog", position: "left" },
           {
@@ -91,8 +91,12 @@ const config = {
             title: "Docs",
             items: [
               {
-                label: "Tutorial",
-                to: "/docs/intro",
+                label: "Getting started",
+                to: "/docs/getting-started",
+              },
+              {
+                label: "Extending OpenAssistants",
+                to: "/docs/category/extending-openassistants",
               },
             ],
           },
@@ -100,16 +104,16 @@ const config = {
             title: "Community",
             items: [
               {
-                label: "Stack Overflow",
-                href: "https://stackoverflow.com/questions/tagged/docusaurus",
-              },
-              {
                 label: "Discord",
-                href: "https://discordapp.com/invite/docusaurus",
+                href: "https://discord.gg/Snd4Cry7wD",
               },
               {
-                label: "Twitter",
-                href: "https://twitter.com/docusaurus",
+                label: "X",
+                href: "https://x.com/DefinitiveIO",
+              },
+              {
+                label: "GitHub",
+                href: "https://github.com/definitive-io/openassistants",
               },
             ],
           },
@@ -117,17 +121,17 @@ const config = {
             title: "More",
             items: [
               {
-                label: "Blog",
-                to: "/blog",
+                label: "Definitive website",
+                to: "https://www.definitive.io/",
               },
               {
-                label: "GitHub",
-                href: "https://github.com/facebook/docusaurus",
+                label: "LangChain",
+                href: "https://github.com/langchain-ai/langchain",
               },
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+        copyright: `© ${new Date().getFullYear()} Definitive Intelligence Inc.`,
       },
       prism: {
         theme: prismThemes.github,
