@@ -6,7 +6,7 @@ authors = ["Rick Lamers <ricklamers@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.10,<3.12"
 sse-starlette = "^1.8.2"
 fastapi = "^0.104.1"
 starlette = ">=0.27.0,<0.28.0"
