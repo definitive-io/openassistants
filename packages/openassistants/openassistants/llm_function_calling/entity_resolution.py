@@ -17,7 +17,7 @@ async def _vec_search(documents: List[Document], query: str, embeddings: Embeddi
     )
     results = await search.asimilarity_search(
         query,
-        k=10,
+        k=3,
     )
     return results
 
