@@ -7,7 +7,8 @@ from langchain.schema.messages import SystemMessage
 from openassistants.data_models.chat_messages import ensure_alternating
 from openassistants.utils.langchain import is_openai
 
-OUTPUT_FORMAT_INSTRUCTION = """The output should be formatted as a JSON instance that conforms to the JSON schema below. 
+OUTPUT_FORMAT_INSTRUCTION = """\
+The output should be formatted as a JSON instance that conforms to the JSON schema below.
 
 As an example, for the schema {{"properties": {{"foo": {{"title": "Foo", "description": "a list of strings", "type": "array", "items": {{"type": "string"}}}}}}, "required": ["foo"]}}
 
@@ -16,7 +17,7 @@ the object {{"foo": ["bar", "baz"]}} is a well-formatted instance of the schema.
 {schema}
 
 Always return a valid JSON object instance.
-"""
+"""  # noqa: E501
 
 
 def chunk_list_by_max_size(lst, max_size):
@@ -36,6 +37,7 @@ async def generate_to_json(
     chat: BaseChatModel, messages, output_json_schema, task_name: str
 ) -> dict:
     if is_openai(chat):
+        assert isinstance(chat, ChatOpenAI)
         return await generate_to_json_openai(
             chat, messages, output_json_schema, task_name
         )
@@ -93,7 +95,8 @@ async def generate_to_json_openai(
         # Check if function_call['name'] matches the task_name
         if function_call["name"] != task_name:
             raise ValueError(
-                f"Function call name {function_call['name']} does not match task name {task_name}"
+                f"Function call name {function_call['name']} "
+                f"does not match task name {task_name}"
             )
 
         # Return function_call['arguments'] as parsed dict

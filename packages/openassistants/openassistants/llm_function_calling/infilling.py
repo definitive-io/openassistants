@@ -1,7 +1,6 @@
-import json
 from typing import Dict, TypedDict
 
-from langchain.schema.messages import HumanMessage, SystemMessage
+from langchain.schema.messages import HumanMessage
 from openassistants.data_models.chat_messages import opas_to_lc
 from openassistants.functions.base import BaseFunction
 from openassistants.llm_function_calling.utils import generate_to_json
