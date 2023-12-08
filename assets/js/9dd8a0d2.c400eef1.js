@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[54],{7275:(s,t,e)=>{e.r(t),e.d(t,{default:()=>r});e(7294);var c=e(6550),n=e(2263),o=e(5893);function r(){const{siteConfig:s}=(0,n.Z)(),{baseUrl:t}=s;return(0,o.jsx)(c.l_,{to:`${t}docs/getting-started`})}}}]);
