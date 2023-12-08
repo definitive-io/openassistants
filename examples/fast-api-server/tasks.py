@@ -8,9 +8,12 @@ PROJECT_DIR = str(pathlib.Path(__file__).parents[0])
 @task
 def run(ctx):
     with ctx.cd(PROJECT_DIR):
-        ctx.run("poetry run uvicorn fast_api_server.main:app --reload "
-                "--reload-dir fast_api_server "
-                "--reload-dir library ", pty=True)
+        ctx.run(
+            "poetry run uvicorn fast_api_server.main:app --reload "
+            "--reload-dir fast_api_server "
+            "--reload-dir library ",
+            pty=True,
+        )
 
 
 @task
@@ -18,6 +21,13 @@ def refresh(ctx):
     with ctx.cd(PROJECT_DIR):
         ctx.run("rm -r .venv poetry.lock")
         ctx.run("poetry install --with test", pty=True)
+
+
+@task
+def isort(ctx):
+    print("Sorting imports with isort")
+    with ctx.cd(PROJECT_DIR):
+        ctx.run("poetry run isort .", pty=True)
 
 
 @task
@@ -57,6 +67,6 @@ def coverage(ctx):
         )
 
 
-@task(pre=[format, lint, typing, test, coverage])
+@task(pre=[isort, format, lint, typing, test, coverage])
 def check(_):
     pass

@@ -7,13 +7,14 @@ from langchain.schema.messages import (
     HumanMessage,
     merge_content,
 )
+from pydantic import BaseModel, Field
+
 from openassistants.data_models.function_input import FunctionCall, FunctionInputRequest
 from openassistants.data_models.function_output import (
     DataFrameOutput,
     FunctionOutput,
     TextOutput,
 )
-from pydantic import BaseModel, Field
 
 
 class SuggestedPrompt(BaseModel):

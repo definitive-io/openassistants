@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from langchain.chat_models.base import BaseChatModel
 from langchain.chat_models.openai import ChatOpenAI
+
 from openassistants.data_models.chat_messages import (
     OpasAssistantMessage,
     OpasFunctionMessage,

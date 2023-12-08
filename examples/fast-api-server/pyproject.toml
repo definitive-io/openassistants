@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-openassistants = {path = "../../packages/openassistants", develop = true}
+openassistants = {path = "../../packages/openassistants", extras = ["duckdb"], develop = true}
 openassistants-fastapi = {path = "../../packages/openassistants-fastapi", develop = true}
 fastapi = "^0.104.1"
 uvicorn = "^0.24.0.post1"
@@ -21,6 +21,7 @@ invoke = "^2.2.0"
 mypy = "^1.7.1"
 pytest = "^7.4.3"
 pytest-asyncio = "^0.23.2"
+isort = "^5.12.0"
 
 [tool.isort]
 profile = "black"

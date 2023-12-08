@@ -8,6 +8,8 @@ from typing import Annotated, Any, Callable, Dict, List, Literal, Optional, Tupl
 import jsonschema
 from langchain.chains.openai_functions.base import convert_pydantic_to_openai_function
 from langchain.chat_models import ChatOpenAI
+from pydantic import BaseModel, Field
+
 from openassistants.core.assistant import Assistant
 from openassistants.data_models.chat_messages import (
     OpasAssistantMessage,
@@ -19,7 +21,6 @@ from openassistants.data_models.function_input import FunctionCall
 from openassistants.data_models.function_output import DataFrameOutput, TextOutput
 from openassistants.eval.base import extract_assistant_autofill_function
 from openassistants.utils.async_utils import last_value
-from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 

@@ -4,6 +4,7 @@ import numpy as np
 from langchain.chat_models.base import BaseChatModel
 from langchain.chat_models.openai import ChatOpenAI
 from langchain.schema.messages import SystemMessage
+
 from openassistants.data_models.chat_messages import ensure_alternating
 from openassistants.utils.langchain import is_openai
 

@@ -3,13 +3,14 @@ import asyncio
 from pathlib import Path
 from typing import Annotated, List, Optional
 
+from pydantic import Field, TypeAdapter
+from starlette.concurrency import run_in_threadpool
+
 from openassistants.contrib.duckdb_query import DuckDBQueryFunction
 from openassistants.contrib.python_eval import PythonEvalFunction
 from openassistants.contrib.sqlalchemy_query import QueryFunction
 from openassistants.functions.base import BaseFunction
 from openassistants.utils import yaml
-from pydantic import Field, TypeAdapter
-from starlette.concurrency import run_in_threadpool
 
 AllFunctionTypes = Annotated[
     QueryFunction | DuckDBQueryFunction | PythonEvalFunction,

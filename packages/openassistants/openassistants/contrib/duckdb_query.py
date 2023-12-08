@@ -2,9 +2,10 @@ import os
 from typing import List, Literal
 
 import pandas as pd
+from sqlalchemy import Engine, create_engine
+
 from openassistants.contrib.sqlalchemy_query import QueryFunction
 from openassistants.functions.base import FunctionExecutionDependency
-from sqlalchemy import Engine, create_engine
 
 
 class DuckDBQueryFunction(QueryFunction):

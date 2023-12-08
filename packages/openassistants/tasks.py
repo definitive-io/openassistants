@@ -27,6 +27,13 @@ def lint(ctx):
 
 
 @task
+def isort(ctx):
+    print("Sorting imports with isort")
+    with ctx.cd(PROJECT_DIR):
+        ctx.run("poetry run isort .", pty=True)
+
+
+@task
 def typing(ctx):
     print("Type checking with mypy")
     with ctx.cd(PROJECT_DIR):
@@ -51,6 +58,6 @@ def coverage(ctx):
         )
 
 
-@task(pre=[format, lint, typing, test, coverage])
+@task(pre=[isort, format, lint, typing, test, coverage])
 def check(_):
     pass
