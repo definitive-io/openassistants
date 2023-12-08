@@ -1,0 +1,34 @@
+name: "Docusaurus 🦖 GitHub Pages"
+description: "Builds and syncs Docusaurus site to GitHub Pages"
+author: docuactions
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+      # Node is required for npm
+      - name: Set up Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+          cache: "yarn"
+      # Install and build Docusaurus website
+      - name: Build Docusaurus website
+        path: ./docs
+        run: |
+          yarn
+          yarn build
+      - name: Deploy to GitHub Pages
+        if: success()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build
