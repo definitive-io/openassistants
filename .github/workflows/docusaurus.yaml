@@ -1,5 +1,4 @@
 name: "Docusaurus 🦖 GitHub Pages"
-description: "Builds and syncs Docusaurus site to GitHub Pages"
 
 on:
   push:
@@ -18,7 +17,7 @@ jobs:
           node-version: "16"
           cache: "yarn"
       - name: Build Docusaurus website
-        path: ./docs
+        working-directory: ./docs
         run: |
           yarn
           yarn build
