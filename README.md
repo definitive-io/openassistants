@@ -24,10 +24,11 @@ Join us in creating AI assistants that are not only useful but dependable for pr
 - Support for 50+ functions in a single chat Assistant
 - Native OpenAI Functions integration
 
-<div style="text-align:center;">
-<img src="docs/static/img/openassistants.png" style="max-width:500px" />
-<div><i>OpenAssistants UI</i></div>
-</div>
+<br />
+<p align="center">
+<img src="docs/static/img/openassistants.png" /><br />
+  <i>OpenAssistants UI</i>
+</p>
 
 ## Quick Start
 
