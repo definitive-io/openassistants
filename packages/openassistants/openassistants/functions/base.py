@@ -1,7 +1,7 @@
 import abc
 import dataclasses
 import textwrap
-from typing import List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence
 
 from langchain.chat_models.base import BaseChatModel
 from pydantic import BaseModel
@@ -17,6 +17,10 @@ class FunctionExecutionDependency:
     chat_history: List[OpasMessage]
     arguments: dict
     summarization_chat_model: BaseChatModel
+
+
+class BaseFunctionEntityConfig(BaseModel):
+    entities: List[Dict[str, Any]]
 
 
 class BaseFunction(BaseModel, abc.ABC):
@@ -60,3 +64,6 @@ def {self.id}({params_repr}) -> pd.DataFrame:
 
     def get_function_name(self) -> str:
         return f"{self.id}"
+
+    async def get_entity_configs(self) -> Dict[str, BaseFunctionEntityConfig]:
+        return {}

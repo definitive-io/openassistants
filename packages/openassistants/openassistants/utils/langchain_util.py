@@ -5,6 +5,7 @@ from langchain.chat_models.openai import ChatOpenAI
 from langchain.schema.embeddings import Embeddings
 from langchain.schema import BaseStore
 from langchain.embeddings import CacheBackedEmbeddings
+from langchain.storage import LocalFileStore
 
 
 def is_openai(chat):
@@ -15,7 +16,7 @@ class LangChainCachedEmbeddings(Embeddings):
     def __init__(
             self,
             langchain_underlying_embedder: Embeddings,
-            langchain_embedding_store: BaseStore[str, bytes],
+            langchain_embedding_store: BaseStore[str, bytes] = LocalFileStore("/tmp/openassistants_entity_embeddings"),
     ):
         embedder_params = ",".join(
             sorted(

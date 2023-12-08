@@ -1,23 +1,15 @@
 from typing import Sequence
 
 import pandas as pd
+
 from openassistants.contrib.python_callable import PythonCallableFunction
 from openassistants.data_models.function_input import BaseJSONSchema
 from openassistants.data_models.function_output import FunctionOutput, TextOutput
-from openassistants.functions.base import FunctionExecutionDependency
+from openassistants.functions.base import BaseFunctionEntityConfig, FunctionExecutionDependency
 from openassistants.functions.utils import AsyncStreamVersion
 
 
-async def find_email_by_name_callable(
-    deps: FunctionExecutionDependency,
-) -> AsyncStreamVersion[Sequence[FunctionOutput]]:
-    """
-    user entities are:
-    name | email
-    richard | richard@hooli.com
-    ...
-    """
-
+async def _execute(deps: FunctionExecutionDependency) -> AsyncStreamVersion[Sequence[FunctionOutput]]:
     name = deps.arguments["name"]
 
     # load csv
@@ -27,6 +19,16 @@ async def find_email_by_name_callable(
     email = df[df["name"] == name]["email"].iloc[0]
 
     yield [TextOutput(text=f"Found Email For: {name} ({email})")]
+
+
+async def _get_entity_configs() -> dict[str, BaseFunctionEntityConfig]:
+    df = pd.read_csv("dummy-data/employees.csv")
+    records = df[["name"]].to_json(index=False, orient="records")
+    return {
+        "name": BaseFunctionEntityConfig(
+            entities=records,
+        )
+    }
 
 
 find_email_by_name_function = PythonCallableFunction(
@@ -47,5 +49,7 @@ find_email_by_name_function = PythonCallableFunction(
             "required": ["name"],
         }
     ),
-    callable=find_email_by_name_callable,
+    execute_callable=_execute,
+    get_entity_configs_callable=_get_entity_configs,
 )
+
