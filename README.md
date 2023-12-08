@@ -30,7 +30,7 @@ Join us in creating AI assistants that are not only useful but dependable for pr
 <br>
 <p align="center">
 <br>
- ![ui-animation](https://github.com/definitive-io/openassistants/assets/1309307/3e7821f4-62d8-42c0-80c7-94be8b3f2e2c)
+ <img src="https://github.com/definitive-io/openassistants/assets/1309307/3e7821f4-62d8-42c0-80c7-94be8b3f2e2c" />
  <br><i>OpenAssistants UI</i>
 </p>
 
