@@ -35,12 +35,12 @@ Join us in creating AI assistants that are not only useful but dependable for pr
 
 To run the project locally:
 
-- Navigate to `example/fast-api-server`:
+- Navigate to `examples/fast-api-server`:
   - Run `poetry install`
   - Activate the virtual environment with `poetry shell`
   - Start the server with `./run.sh`
 
-- Then, go to `example/next`:
+- Then, go to `examples/next`:
   - Install dependencies with `yarn install`
   - Launch the development server with `yarn run dev`
   - Access the application at `localhost:3000`
