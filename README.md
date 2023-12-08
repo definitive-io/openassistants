@@ -5,6 +5,8 @@
 [![OpenAssistants-FastAPI PyPI](https://img.shields.io/pypi/v/openassistants-fastapi.svg)](https://pypi.org/project/openassistants-fastapi/)
 [![npm version](https://img.shields.io/npm/v/@definitive-io/openassistants-ui)](https://www.npmjs.com/package/@definitive-io/openassistants-ui)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Discord](https://img.shields.io/discord/1182644873992613989.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/Snd4Cry7wD)
+
 
 OpenAssistants is a collection of open source libraries aimed at developing robust AI assistants rather than autonomous agents. By focusing on specific tasks and incorporating human oversight, OpenAssistants strives to minimize error rates typically found in agentic systems.
 
