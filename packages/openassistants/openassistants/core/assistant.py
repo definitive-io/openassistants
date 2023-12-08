@@ -3,6 +3,8 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from langchain.chat_models.base import BaseChatModel
 from langchain.chat_models.openai import ChatOpenAI
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.embeddings.base import Embeddings
 
 from openassistants.data_models.chat_messages import (
     OpasAssistantMessage,
@@ -11,20 +13,27 @@ from openassistants.data_models.chat_messages import (
     OpasUserMessage,
 )
 from openassistants.data_models.function_input import FunctionCall, FunctionInputRequest
-from openassistants.functions.base import BaseFunction, FunctionExecutionDependency
+from openassistants.functions.base import (
+    BaseFunction,
+    Entity,
+    FunctionExecutionDependency,
+)
 from openassistants.functions.crud import FunctionCRUD, LocalCRUD
+from openassistants.llm_function_calling.entity_resolution import resolve_entities
 from openassistants.llm_function_calling.infilling import (
     generate_argument_decisions,
     generate_arguments,
 )
 from openassistants.llm_function_calling.selection import select_function
 from openassistants.utils.async_utils import AsyncStreamVersion
+from openassistants.utils.langchain_util import LangChainCachedEmbeddings
 
 
 class Assistant:
     function_identification: BaseChatModel
     function_infilling: BaseChatModel
     function_summarization: BaseChatModel
+    entity_embedding_model: Embeddings
     function_libraries: List[FunctionCRUD]
 
     _cached_all_functions: List[BaseFunction]
@@ -32,13 +41,24 @@ class Assistant:
     def __init__(
         self,
         libraries: List[str | FunctionCRUD],
-        function_identification: BaseChatModel = ChatOpenAI(model="gpt-3.5-turbo-16k"),
-        function_infilling: BaseChatModel = ChatOpenAI(model="gpt-3.5-turbo-16k"),
-        function_summarization: BaseChatModel = ChatOpenAI(model="gpt-3.5-turbo-16k"),
+        function_identification: Optional[BaseChatModel] = None,
+        function_infilling: Optional[BaseChatModel] = None,
+        function_summarization: Optional[BaseChatModel] = None,
+        entity_embedding_model: Optional[Embeddings] = None,
     ):
-        self.function_identification = function_identification
-        self.function_infilling = function_infilling
-        self.function_summarization = function_summarization
+        # instantiate dynamically vs as default args
+        self.function_identification = function_identification or ChatOpenAI(
+            model_name="gpt-3.5-turbo-16k", temperature=0.0, max_tokens=128
+        )
+        self.function_infilling = function_infilling or ChatOpenAI(
+            model_name="gpt-3.5-turbo-16k", temperature=0.0, max_tokens=128
+        )
+        self.function_summarization = function_summarization or ChatOpenAI(
+            model_name="gpt-3.5-turbo-16k", temperature=0.0, max_tokens=1024
+        )
+        self.entity_embedding_model = (
+            entity_embedding_model or LangChainCachedEmbeddings(OpenAIEmbeddings())
+        )
         self.function_libraries = [
             library if isinstance(library, FunctionCRUD) else LocalCRUD(library)
             for library in libraries
@@ -83,6 +103,7 @@ class Assistant:
         message: OpasUserMessage,
         selected_function: BaseFunction,
         args_json_schema: dict,
+        entities_info: Dict[str, List[Entity]],
     ) -> Tuple[bool, dict]:
         # Perform infilling and generate argument decisions in parallel
         arguments_future = asyncio.create_task(
@@ -91,6 +112,7 @@ class Assistant:
                 self.function_infilling,
                 message.content,
                 dependencies.get("chat_history"),
+                entities_info,
             )
         )
         argument_decisions_future = asyncio.create_task(
@@ -183,6 +205,15 @@ class Assistant:
             await selected_function.get_parameters_json_schema()
         )
 
+        # perform entity resolution
+        entities_info = await resolve_entities(
+            selected_function,
+            self.function_infilling,
+            self.entity_embedding_model,
+            message.content,
+            dependencies.get("chat_history"),
+        )
+
         # perform argument infilling
         if len(selected_function_arg_json_schema["properties"]) > 0:
             complete, arguments = await self.do_infilling(
@@ -190,6 +221,7 @@ class Assistant:
                 message,
                 selected_function,
                 selected_function_arg_json_schema,
+                entities_info,
             )
         else:
             complete, arguments = True, {}
