@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[430],{9371:s=>{s.exports=JSON.parse('[{"label":"facebook","permalink":"/openassistants/blog/tags/facebook","count":1},{"label":"hello","permalink":"/openassistants/blog/tags/hello","count":1},{"label":"docusaurus","permalink":"/openassistants/blog/tags/docusaurus","count":1}]')}}]);

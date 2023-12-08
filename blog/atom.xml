@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>https://definitive-io.github.io/openassistants/blog</id>
+    <id>https://openassistantsdocs.io/blog</id>
     <title>OpenAssistants Blog</title>
     <updated>2023-12-08T00:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
-    <link rel="alternate" href="https://definitive-io.github.io/openassistants/blog"/>
+    <link rel="alternate" href="https://openassistantsdocs.io/blog"/>
     <subtitle>OpenAssistants Blog</subtitle>
-    <icon>https://definitive-io.github.io/openassistants/img/definitive.ico</icon>
+    <icon>https://openassistantsdocs.io/img/definitive.ico</icon>
     <entry>
         <title type="html"><![CDATA[Assistants not Agents]]></title>
-        <id>https://definitive-io.github.io/openassistants/blog/assistants-not-agents</id>
-        <link href="https://definitive-io.github.io/openassistants/blog/assistants-not-agents"/>
+        <id>https://openassistantsdocs.io/blog/assistants-not-agents</id>
+        <link href="https://openassistantsdocs.io/blog/assistants-not-agents"/>
         <updated>2023-12-08T00:00:00.000Z</updated>
         <summary type="html"><![CDATA[In the fast-evolving world of AI systems, the distinction between building AI assistants and autonomous agents has become crucial. Recent insights from Dharmesh Shah highlight the inherent challenges with AI agents and why a more focused approach is preferable.]]></summary>
         <content type="html"><![CDATA[<p>In the fast-evolving world of AI systems, the distinction between building AI assistants and autonomous agents has become crucial. Recent insights from <a href="https://agent.ai/p/why-most-agent-ais-dont-work-yet" target="_blank" rel="noopener noreferrer">Dharmesh Shah</a> highlight the inherent challenges with AI agents and why a more focused approach is preferable.</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="the-pitfall-of-autonomous-agents">The Pitfall of Autonomous Agents<a href="https://definitive-io.github.io/openassistants/blog/assistants-not-agents#the-pitfall-of-autonomous-agents" class="hash-link" aria-label="Direct link to The Pitfall of Autonomous Agents" title="Direct link to The Pitfall of Autonomous Agents">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="the-pitfall-of-autonomous-agents">The Pitfall of Autonomous Agents<a href="https://openassistantsdocs.io/blog/assistants-not-agents#the-pitfall-of-autonomous-agents" class="hash-link" aria-label="Direct link to The Pitfall of Autonomous Agents" title="Direct link to The Pitfall of Autonomous Agents">​</a></h4>
 <p>AI agents, like those in projects such as AutoGPT and BabyAGI, are designed to function autonomously, handling a series of tasks without human intervention. This sounds ideal, but there's a catch. These agents rely on imperfect Large Language Models (LLMs) like GPT to interpret goals and execute tasks. While LLMs are incredibly advanced, they're not infallible. They have an inherent error rate, which might seem negligible at a glance but can significantly impact an agent's performance.</p>
 <p>For instance, if an LLM has a 95% success rate for each task, the cumulative success rate drops alarmingly with each additional task an agent undertakes. The mathematics behind this shows that even with a high individual task success rate, the overall reliability of an agent can diminish rapidly, reducing its effectiveness to a mere coin toss in complex scenarios. This is particularly problematic for general-purpose agents trying to cater to diverse functions.</p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="the-advantage-of-ai-assistants">The Advantage of AI Assistants<a href="https://definitive-io.github.io/openassistants/blog/assistants-not-agents#the-advantage-of-ai-assistants" class="hash-link" aria-label="Direct link to The Advantage of AI Assistants" title="Direct link to The Advantage of AI Assistants">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="the-advantage-of-ai-assistants">The Advantage of AI Assistants<a href="https://openassistantsdocs.io/blog/assistants-not-agents#the-advantage-of-ai-assistants" class="hash-link" aria-label="Direct link to The Advantage of AI Assistants" title="Direct link to The Advantage of AI Assistants">​</a></h4>
 <p>This is where AI assistants come into the limelight. Unlike their autonomous counterparts, AI assistants are designed to perform specific tasks, one at a time, with human interaction playing a central role. This approach has several advantages:</p>
 <ol>
 <li>
@@ -33,7 +33,7 @@
 <p><strong>Flexibility and Control</strong>: With AI assistants, users maintain control, dictating the pace and direction of the task. This leads to a more user-friendly experience, as the assistant can adapt to the user's needs and preferences.</p>
 </li>
 </ol>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="launching-openassistants">Launching <code>OpenAssistants</code><a href="https://definitive-io.github.io/openassistants/blog/assistants-not-agents#launching-openassistants" class="hash-link" aria-label="Direct link to launching-openassistants" title="Direct link to launching-openassistants">​</a></h4>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="launching-openassistants">Launching <code>OpenAssistants</code><a href="https://openassistantsdocs.io/blog/assistants-not-agents#launching-openassistants" class="hash-link" aria-label="Direct link to launching-openassistants" title="Direct link to launching-openassistants">​</a></h4>
 <p>That's where <code>openassistants</code> comes in. We aim to make it easier to develop robust assistants that rely on function calling for performing actions and retrieving information into a conversational context. With a human in the loop these systems can be <em>useful</em> and <em>reliable</em>. Our goal is to make the process of building robust assistants as easy as possible by putting as much boilerplate and common components into a set of extensible and composible libraries.</p>
 <p>We're launching with three packages:</p>
 <ul>
@@ -42,8 +42,8 @@
 <li><code>openassistants-ui</code> an example chat client that supports rich streaming outputs like tables, plots, form inputs and text.</li>
 </ul>
 <p>The project is built on top of LangChain and we will soon support more sophisticated RAG features based on LlamaIndex. Our goal is to be the open alternative to the AssistantsAPI that can operate against any LLM: both Open Source LLMs like fine-tuned Llama's focused on function calling and proprietary models with e.g. native support for function calling.</p>
-<p><img loading="lazy" src="https://definitive-io.github.io/openassistants/assets/images/openassistants-16feeb0a171a4fa49bae23435f235089.png" width="841" height="683" class="img_ev3q"></p>
-<h4 class="anchor anchorWithStickyNavbar_LWe7" id="conclusion">Conclusion<a href="https://definitive-io.github.io/openassistants/blog/assistants-not-agents#conclusion" class="hash-link" aria-label="Direct link to Conclusion" title="Direct link to Conclusion">​</a></h4>
+<p><img loading="lazy" src="https://openassistantsdocs.io/assets/images/openassistants-16feeb0a171a4fa49bae23435f235089.png" width="841" height="683" class="img_ev3q"></p>
+<h4 class="anchor anchorWithStickyNavbar_LWe7" id="conclusion">Conclusion<a href="https://openassistantsdocs.io/blog/assistants-not-agents#conclusion" class="hash-link" aria-label="Direct link to Conclusion" title="Direct link to Conclusion">​</a></h4>
 <p>In conclusion, while the allure of fully autonomous AI agents is undeniable, the current state of technology suggests a more measured approach. Building AI assistants that excel in specific tasks and work in harmony with human users is not just practical but also more aligned with our current technological capabilities. This approach promises a more reliable AI experience that leads to experiences that we can actually deploy with confidence in production today.</p>]]></content>
         <author>
             <name>Rick Lamers</name>
