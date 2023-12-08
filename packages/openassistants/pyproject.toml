@@ -16,7 +16,8 @@ sqlalchemy = "^2.0.23"
 openai = "^1.3.7"
 pyyaml = "^6.0.1"
 duckdb-engine = "^0.9.3"
-duckduckgo-search = "^3.9.11"
+tiktoken = "^0.5.2"
+usearch = "^2.8.14"
 
 [tool.poetry.group.test.dependencies]
 black = "^23.11.0"

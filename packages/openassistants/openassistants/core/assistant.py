@@ -27,11 +27,14 @@ from openassistants.llm_function_calling.selection import select_function
 from openassistants.utils.async_utils import AsyncStreamVersion
 from openassistants.utils.langchain_util import LangChainCachedEmbeddings
 
+llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.0, max_tokens=1000)
+
 
 class Assistant:
     function_identification: BaseChatModel
     function_infilling: BaseChatModel
     function_summarization: BaseChatModel
+    entity_embedding_model: Embeddings
     function_libraries: List[FunctionCRUD]
 
     _cached_all_functions: List[BaseFunction]
@@ -39,14 +42,15 @@ class Assistant:
     def __init__(
         self,
         libraries: List[str | FunctionCRUD],
-        function_identification: BaseChatModel = ChatOpenAI(model="gpt-3.5-turbo-16k"),
-        function_infilling: BaseChatModel = ChatOpenAI(model="gpt-3.5-turbo-16k"),
-        function_summarization: BaseChatModel = ChatOpenAI(model="gpt-3.5-turbo-16k"),
+        function_identification: BaseChatModel = llm,
+        function_infilling: BaseChatModel = llm,
+        function_summarization: BaseChatModel = llm,
         entity_embedding_model: Embeddings = LangChainCachedEmbeddings(OpenAIEmbeddings()),
     ):
         self.function_identification = function_identification
         self.function_infilling = function_infilling
         self.function_summarization = function_summarization
+        self.entity_embedding_model = entity_embedding_model
         self.function_libraries = [
             library if isinstance(library, FunctionCRUD) else LocalCRUD(library)
             for library in libraries
@@ -198,7 +202,9 @@ class Assistant:
 
         # perform entity resolution
         entities_info = await resolve_entities(
-            selected_function, selected_function_args or {}
+            selected_function,
+            selected_function_args or {},
+            self.entity_embedding_model,
         )
 
 

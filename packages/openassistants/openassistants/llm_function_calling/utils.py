@@ -1,4 +1,5 @@
 import json
+from typing import Optional
 
 import numpy as np
 from langchain.chat_models.base import BaseChatModel
@@ -6,18 +7,13 @@ from langchain.chat_models.openai import ChatOpenAI
 from langchain.schema.messages import SystemMessage
 
 from openassistants.data_models.chat_messages import ensure_alternating
-from openassistants.utils.langchain import is_openai
 
 OUTPUT_FORMAT_INSTRUCTION = """\
-The output should be formatted as a JSON instance that conforms to the JSON schema below.
-
-As an example, for the schema {{"properties": {{"foo": {{"title": "Foo", "description": "a list of strings", "type": "array", "items": {{"type": "string"}}}}}}, "required": ["foo"]}}
-
-the object {{"foo": ["bar", "baz"]}} is a well-formatted instance of the schema. The object {{"properties": {{"foo": ["bar", "baz"]}}}} is not well-formatted.
+The output should fit the JSON Schema:
 
 {schema}
 
-Always return a valid JSON object instance.
+Always return valid JSON.
 """  # noqa: E501
 
 
@@ -35,27 +31,35 @@ def find_json_substring(s):
 
 
 async def generate_to_json(
-    chat: BaseChatModel, messages, output_json_schema, task_name: str
+    chat: BaseChatModel,
+    messages,
+    output_json_schema: Optional[dict],
+    task_name: str,
 ) -> dict:
-    if is_openai(chat):
-        assert isinstance(chat, ChatOpenAI)
-        return await generate_to_json_openai(
-            chat, messages, output_json_schema, task_name
+    return await generate_to_json_generic(chat, messages, output_json_schema)
+
+
+async def generate_to_json_generic(
+    chat,
+    messages,
+    output_json_schema: Optional[dict],
+) -> dict:
+    if output_json_schema is not None:
+        system_message = SystemMessage(
+            content=OUTPUT_FORMAT_INSTRUCTION.format(
+                schema=json.dumps(output_json_schema, indent=4)
+            )
         )
     else:
-        return await generate_to_json_generic(chat, messages, output_json_schema)
-
-
-async def generate_to_json_generic(chat, messages, output_json_schema) -> dict:
-    system_message = SystemMessage(
-        content=OUTPUT_FORMAT_INSTRUCTION.format(
-            schema=json.dumps(output_json_schema, indent=4)
+        system_message = SystemMessage(
+            content="You are a helpful assistant. You will respond in JSON"
         )
-    )
 
     messages = [system_message] + messages
     response = await chat.ainvoke(ensure_alternating(messages))
     content = response.content
+
+    print("RESPONSE CONTENT:", content)
 
     json_substring = find_json_substring(content)
     if json_substring is not None:
@@ -83,12 +87,14 @@ async def generate_to_json_openai(
             {
                 "type": "function",
                 "name": task_name,
-                "description": "Get the current weather in a given location",
+                "description": task_name,
                 "parameters": output_json_schema,
             }
         ],
         function_call={"name": task_name},
     )
+
+    print("LLM RESPONSE:", response)
 
     if "function_call" in response.additional_kwargs:
         function_call = response.additional_kwargs["function_call"]

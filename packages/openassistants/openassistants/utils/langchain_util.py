@@ -35,7 +35,7 @@ class LangChainCachedEmbeddings(Embeddings):
         self.embedder = CacheBackedEmbeddings.from_bytes_store(
             langchain_underlying_embedder,
             langchain_embedding_store,
-            namespace=namespace,
+            namespace=str(hash(namespace)),
         )
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:

@@ -2,7 +2,7 @@ import asyncio
 from typing import Any, Dict, List, Optional
 
 from langchain.chat_models.base import BaseChatModel
-from langchain.schema.messages import HumanMessage
+from langchain.schema.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel
 
 from openassistants.functions.base import BaseFunction
@@ -18,20 +18,23 @@ async def filter_functions(
     functions_text = "\n".join(
         await asyncio.gather(*[f.get_signature() for f in functions])
     )
-    json_schema = {
-        "type": "object",
-        "properties": {"function_name": {"type": "string"}},
-        "required": ["function_name"],
-    }
+    # json_schema = {
+    #     "type": "object",
+    #     "properties": {"function_name": {"type": "string"}},
+    #     "required": ["function_name"],
+    # }
     messages = [
         HumanMessage(
             content=f"""{functions_text}
-Which of these functions is most suitable given the user query: "{user_query}"?"""
+Which of these functions is most suitable given the user query: "{user_query}"?
+
+Respond with the JSON: {{"function_name": "..."}}
+"""
         ),
     ]
 
     function_names = (
-        await generate_to_json(chat, messages, json_schema, "filter_functions")
+        await generate_to_json(chat, messages, None, "filter_functions")
     ).get("function_name")
 
     return function_names
@@ -71,40 +74,42 @@ async def select_function(
         [await f.get_signature() for f in selected_functions]
     )
 
-    json_schema = {
-        "type": "object",
-        "properties": {
-            "function_name": {"type": "string"},
-            "function_args": {
-                "type": "object",
-            },
-            "suggested_function_names": {"type": "array", "items": {"type": "string"}},
-        },
-        "anyOf": [
-            {"required": ["function_name"]},
-            {"required": ["suggested_function_names"]},
-        ],
-    }
+    # json_schema = {
+    #     "type": "object",
+    #     "properties": {
+    #         "function_name": {"type": "string"},
+    #         "function_args": { "type": "object" },
+    #         "suggested_function_names": {"type": "array", "items": {"type": "string"}},
+    #     }
+    # }
 
     selection_messages = [
+        SystemMessage(content="You are a helpful assistant. You will respond in JSON"),
         HumanMessage(
             content=f"""Prior selection reduced the candidates to these functions:
 {selected_functions_signatures}
+---
+User Query: {user_query}
+---
+Instructions:
 
-Scenario 1: There is a function in the list of candidates that is a match to the user query.
-Action: provide the name of the function as the 'function_name' argument. provide arguments for the function.
+If there function in the list of candidates that is a match to the user query.
+* Select the function name as 'function_name'.
+* Provide the function arguments as 'function_args'.
+* Respond with the JSON: {{ "function_name": "...", "function_args": {{ ... }} }}
 
-Scenario 2: None of the functions in the list of candidates match the user query.
-Action: select related functions from the list of candidates as the 'suggested_function_names' argument. You are also allowed to return an empty list of suggested functions if you think none of the functions are a good match.
+If None of the functions in the list of candidates match the user query.
+* Select related functions from the list of candidates as 'suggested_function_names'. 
+* If you think none of the functions are a good match, return an empty list.
+* Respond with the JSON {{ "suggested_function_names": ["...", "..."] }}
 
-First decide which of the two scenarios is the case. Then take the appropriate action.
-
-Given the user query: "{user_query}", which of these functions is the best match?"""  # noqa: E501
+Respond with JSON
+"""  # noqa: E501
         ),
     ]
 
     json_result = await generate_to_json(
-        chat, selection_messages, json_schema, "select_function"
+        chat, selection_messages, None, "select_function"
     )
 
     function_name = json_result.get("function_name")
@@ -121,5 +126,7 @@ Given the user query: "{user_query}", which of these functions is the best match
     ] or None
 
     return SelectFunctionResult(
-        function=selected_function, suggested_functions=suggested_functions
+        function=selected_function,
+        suggested_functions=suggested_functions,
+        function_args=function_args,
     )
