@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from langchain.chat_models.base import BaseChatModel
 from langchain.schema.messages import HumanMessage
@@ -39,6 +39,7 @@ Which of these functions is most suitable given the user query: "{user_query}"?"
 
 class SelectFunctionResult(BaseModel):
     function: Optional[BaseFunction] = None
+    function_args: Optional[Dict[str, Any]] = None
     suggested_functions: Optional[List[BaseFunction]] = None
 
 
@@ -74,6 +75,9 @@ async def select_function(
         "type": "object",
         "properties": {
             "function_name": {"type": "string"},
+            "function_args": {
+                "type": "object",
+            },
             "suggested_function_names": {"type": "array", "items": {"type": "string"}},
         },
         "anyOf": [
@@ -88,7 +92,7 @@ async def select_function(
 {selected_functions_signatures}
 
 Scenario 1: There is a function in the list of candidates that is a match to the user query.
-Action: provide the name of the function as the 'function_name' argument.
+Action: provide the name of the function as the 'function_name' argument. provide arguments for the function.
 
 Scenario 2: None of the functions in the list of candidates match the user query.
 Action: select related functions from the list of candidates as the 'suggested_function_names' argument. You are also allowed to return an empty list of suggested functions if you think none of the functions are a good match.
@@ -104,6 +108,7 @@ Given the user query: "{user_query}", which of these functions is the best match
     )
 
     function_name = json_result.get("function_name")
+    function_args = json_result.get("function_args")
     suggested_function_names = json_result.get("suggested_function_names", [])
 
     selected_function = next(
