@@ -14,7 +14,7 @@ OpenAssistants is a collection of open source libraries aimed at developing robu
 - `openassistants-fastapi` a set of FastAPI routes used for interacting with the core runtime loop through a REST API
 - `openassistants-ui` an example chat client that supports rich streaming outputs like tables, plots, form inputs and text.
 
-It's built on LangChain and designed to be an open alternative to OpenAI's AssistantsAPI.
+OpenAssistants is built on [LangChain](https://github.com/langchain-ai/langchain) and designed to be an open alternative to OpenAI's [Assistants API](https://platform.openai.com/docs/assistants/overview). We also think it's easier to use!
 
 Join us in creating AI assistants that are not only useful but dependable for production use today.
 
