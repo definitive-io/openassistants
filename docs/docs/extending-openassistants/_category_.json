@@ -1,0 +1,8 @@
+{
+  "label": "Extending OpenAssistants",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "OpenAssistants is designed to be extensible."
+  }
+}

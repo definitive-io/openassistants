@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-uvicorn fast-api-server.main:app --reload
+uvicorn fast_api_server.main:app --reload

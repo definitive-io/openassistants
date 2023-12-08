@@ -4,7 +4,7 @@ import { OpenAssistantsChat } from '@openassistants/ui';
 
 export default function Home() {
   return (
-    <main className="flex h-full flex-col items-center justify-between p-24">
+    <main className="flex h-full flex-col items-center justify-between">
       <div className="relative flex w-full h-full overflow-hidden">
         <div className="group w-full pl-0 animate-in duration-300 ease-in-out peer-[[data-state=open]]:lg:pl-[250px] peer-[[data-state=open]]:xl:pl-[300px]">
           <OpenAssistantsChat
