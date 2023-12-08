@@ -31,7 +31,7 @@ class Assistant:
 
     def __init__(
         self,
-        libraries: List[str],
+        libraries: List[str | FunctionCRUD],
         function_identification: BaseChatModel = ChatOpenAI(model="gpt-3.5-turbo-16k"),
         function_infilling: BaseChatModel = ChatOpenAI(model="gpt-3.5-turbo-16k"),
         function_summarization: BaseChatModel = ChatOpenAI(model="gpt-3.5-turbo-16k"),
@@ -39,7 +39,10 @@ class Assistant:
         self.function_identification = function_identification
         self.function_infilling = function_infilling
         self.function_summarization = function_summarization
-        self.function_libraries = [LocalCRUD(library) for library in libraries]
+        self.function_libraries = [
+            library if isinstance(library, FunctionCRUD) else LocalCRUD(library)
+            for library in libraries
+        ]
         self._cached_all_functions = []
 
     async def get_all_functions(self) -> List[BaseFunction]:

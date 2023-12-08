@@ -66,3 +66,18 @@ class LocalCRUD(FunctionCRUD):
             for file in self.directory.iterdir()
             if file.suffix == ".yaml" or file.suffix == ".py"
         ]
+
+
+class PythonCRUD(FunctionCRUD):
+    def __init__(self, functions: List[BaseFunction]):
+        self.functions = functions
+
+    def read(self, slug: str) -> Optional[BaseFunction]:
+        for function in self.functions:
+            if function.id == slug:
+                return function
+
+        return None
+
+    def list_ids(self) -> List[str]:
+        return [function.id for function in self.functions]

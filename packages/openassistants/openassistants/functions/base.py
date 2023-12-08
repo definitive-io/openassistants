@@ -21,7 +21,6 @@ class FunctionExecutionDependency:
 
 class BaseFunction(BaseModel, abc.ABC):
     id: str
-    name: str
     type: str
     display_name: Optional[str]
     description: str

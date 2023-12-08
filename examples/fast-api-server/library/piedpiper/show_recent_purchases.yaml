@@ -1,4 +1,3 @@
-name: show_recent_purchases
 display_name: Show recent purchases
 description: |
   Show a list of recent purchases (last 5)
