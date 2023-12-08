@@ -20,6 +20,7 @@ Join us in creating AI assistants that are not only useful but dependable for pr
 - Included Chat UI
 - Support function calling with any LLM (open source & proprietary)
 - Declarative library of functions
+- Built-in SQL functions (DuckDB support)
 - Extend with any custom Python function
 - Support for 50+ functions in a single chat Assistant
 - Native OpenAI Functions integration
