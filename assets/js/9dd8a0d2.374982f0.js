@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[54],{7275:(s,t,e)=>{e.r(t),e.d(t,{default:()=>c});e(7294);var n=e(6550),a=e(5893);function c(){return(0,a.jsx)(n.l_,{to:"/openassistants/docs/getting-started"})}}}]);
