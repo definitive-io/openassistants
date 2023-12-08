@@ -8,6 +8,8 @@ from typing import Annotated, Any, Callable, Dict, List, Literal, Optional, Tupl
 import jsonschema
 from langchain.chains.openai_functions.base import convert_pydantic_to_openai_function
 from langchain.chat_models import ChatOpenAI
+from pydantic import BaseModel, Field
+
 from openassistants.core.assistant import Assistant
 from openassistants.data_models.chat_messages import (
     OpasAssistantMessage,
@@ -19,7 +21,6 @@ from openassistants.data_models.function_input import FunctionCall
 from openassistants.data_models.function_output import DataFrameOutput, TextOutput
 from openassistants.eval.base import extract_assistant_autofill_function
 from openassistants.utils.async_utils import last_value
-from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
@@ -46,11 +47,11 @@ class GradeSummary(BaseModel):
 
     @classmethod
     def to_openai_function(cls) -> dict:
-        schema = convert_pydantic_to_openai_function(cls)
+        schema = convert_pydantic_to_openai_function(cls)  # type: ignore
         if "description" in schema["parameters"]:
             schema["parameters"].pop("description")
         GradeSummary._remove_key_recursive(schema, "title")
-        return schema
+        return schema  # type: ignore
 
 
 InteractionTypes = Annotated[
@@ -170,7 +171,8 @@ class FunctionInteraction(BaseInteraction):
 
         if not isinstance(assistant_function_call, OpasAssistantMessage):
             interaction_report.failures.append(
-                f"Expected OpasAssistantMessage but got {type(assistant_function_call)} as first response message"
+                f"Expected OpasAssistantMessage but got "
+                f"{type(assistant_function_call)} as first response message"
             )
             return
 
@@ -185,13 +187,15 @@ class FunctionInteraction(BaseInteraction):
 
         if not isinstance(function_response, OpasFunctionMessage):
             interaction_report.failures.append(
-                f"Expected OpasFunctionMessage but got {type(function_response)} as last response message"
+                f"Expected OpasFunctionMessage but got "
+                f"{type(function_response)} as last response message"
             )
             return
 
         if function_response.name != self.function:
             interaction_report.failures.append(
-                f"Expected function {self.function} but got {function_response.name}"
+                f"Expected function {self.function} but got "
+                f"{function_response.name}"
             )
             return
 
@@ -208,7 +212,8 @@ class FunctionInteraction(BaseInteraction):
         if df is None:
             return (
                 [
-                    f"Could not find DataFrameOutput in function response {function_response}"
+                    f"Could not find DataFrameOutput in function response "
+                    f"{function_response}"
                 ],
                 None,
                 function_response,
@@ -221,11 +226,12 @@ class FunctionInteraction(BaseInteraction):
                 function_response,
             )
 
-        llm = ChatOpenAI(model_name="gpt-4-0613", temperature=0.0)
+        llm = ChatOpenAI(model="gpt-4-0613", temperature=0.0)
 
         df_csv = df.to_csv(index=False, date_format="iso")
+        func = f"{function_name}({function_args}"
         prompt = f"""\
-Based on the following data table that was retrieved from calling the function {function_name}({function_args})
+Based on the following data table that was retrieved from calling the function {func})
 ```
 {df_csv}
 ```
@@ -237,7 +243,7 @@ a junior analyst wrote the summary:
 
 Please grade the analysts summary.
 
-Split the analysis in 2 sections: 
+Split the analysis in 2 sections:
 - inaccuracies on facts that can be derived from the data table
 - other inaccuracies
 
@@ -274,7 +280,7 @@ Finally provide a pass / fail:
 
             user_message = OpasUserMessage(content=self.message)
 
-            response_messages = await last_value(
+            response_messages: List[OpasMessage] = await last_value(
                 assistant.run_chat(chat_history + [user_message], True)
             )
 
@@ -290,7 +296,7 @@ Finally provide a pass / fail:
                 ),
             )
 
-            function_response_messages = await last_value(
+            function_response_messages: List[OpasMessage] = await last_value(
                 assistant.run_chat(
                     chat_history
                     + [user_message]
@@ -315,9 +321,9 @@ Finally provide a pass / fail:
                 for child in self.children
             ]
 
-            child_results: List[InteractionReport] = await asyncio.gather(  # type: ignore
+            child_results: List[InteractionReport] = await asyncio.gather(
                 *child_coroutines
-            )
+            )  # type: ignore
 
             report.children.extend(child_results)
 

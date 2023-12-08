@@ -2,13 +2,14 @@ import asyncio
 from typing import List, Optional
 
 from langchain.chat_models.base import BaseChatModel
-from langchain.schema.messages import HumanMessage, SystemMessage
+from langchain.schema.messages import HumanMessage
+from pydantic import BaseModel
+
 from openassistants.functions.base import BaseFunction
 from openassistants.llm_function_calling.utils import (
     chunk_list_by_max_size,
     generate_to_json,
 )
-from pydantic import BaseModel
 
 
 async def filter_functions(
@@ -24,7 +25,8 @@ async def filter_functions(
     }
     messages = [
         HumanMessage(
-            content=f"""{functions_text}\nWhich of these functions is most suitable given the user query: "{user_query}"?"""
+            content=f"""{functions_text}
+Which of these functions is most suitable given the user query: "{user_query}"?"""
         ),
     ]
 
@@ -88,12 +90,12 @@ async def select_function(
 Scenario 1: There is a function in the list of candidates that is a match to the user query.
 Action: provide the name of the function as the 'function_name' argument.
 
-Scenario 2: None of the functions in the list of candidates match the user query. 
+Scenario 2: None of the functions in the list of candidates match the user query.
 Action: select related functions from the list of candidates as the 'suggested_function_names' argument. You are also allowed to return an empty list of suggested functions if you think none of the functions are a good match.
 
 First decide which of the two scenarios is the case. Then take the appropriate action.
 
-Given the user query: "{user_query}", which of these functions is the best match?"""
+Given the user query: "{user_query}", which of these functions is the best match?"""  # noqa: E501
         ),
     ]
 

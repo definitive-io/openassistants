@@ -3,13 +3,14 @@ import asyncio
 from pathlib import Path
 from typing import Annotated, List, Optional
 
+from pydantic import Field, TypeAdapter
+from starlette.concurrency import run_in_threadpool
+
 from openassistants.contrib.duckdb_query import DuckDBQueryFunction
 from openassistants.contrib.python_eval import PythonEvalFunction
 from openassistants.contrib.sqlalchemy_query import QueryFunction
 from openassistants.functions.base import BaseFunction
 from openassistants.utils import yaml
-from pydantic import Field, TypeAdapter
-from starlette.concurrency import run_in_threadpool
 
 AllFunctionTypes = Annotated[
     QueryFunction | DuckDBQueryFunction | PythonEvalFunction,
@@ -48,7 +49,7 @@ class LocalCRUD(FunctionCRUD):
                 parsed_yaml = yaml.load(yaml_file)
                 return TypeAdapter(AllFunctionTypes).validate_python(
                     parsed_yaml | {"id": function_id}
-                )
+                )  # type: ignore
             else:
                 return None
         except Exception as e:
@@ -56,7 +57,7 @@ class LocalCRUD(FunctionCRUD):
 
     async def aread_all(self) -> List[BaseFunction]:
         ids = self.list_ids()
-        return [self.read(f_id) for f_id in ids]
+        return [self.read(f_id) for f_id in ids]  # type: ignore
 
     def list_ids(self) -> List[str]:
         return [

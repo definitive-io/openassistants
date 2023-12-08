@@ -2,10 +2,11 @@ import abc
 import dataclasses
 from typing import Dict, List, Optional
 
-from openassistants.data_models.chat_messages import OpasAssistantMessage, OpasMessage
-from openassistants.data_models.function_input import FunctionCall
 from pydantic import create_model
 from pydantic.fields import FieldInfo
+
+from openassistants.data_models.chat_messages import OpasAssistantMessage, OpasMessage
+from openassistants.data_models.function_input import FunctionCall
 
 
 class Validation(abc.ABC):

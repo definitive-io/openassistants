@@ -3,6 +3,11 @@ from typing import Annotated, Any, List, Literal, Sequence
 
 import pandas as pd
 from langchain.schema import BaseMessage, HumanMessage
+from pydantic import Field, PrivateAttr
+from sqlalchemy import text
+from sqlalchemy.engine import Engine
+from starlette.concurrency import run_in_threadpool
+
 from openassistants.data_models.chat_messages import (
     SuggestedPrompt,
     _render_df_for_llm,
@@ -21,10 +26,6 @@ from openassistants.functions.base import BaseFunction, FunctionExecutionDepende
 from openassistants.functions.visualize import execute_visualization
 from openassistants.utils.async_utils import AsyncStreamVersion
 from openassistants.utils.strings import resolve_str_template
-from pydantic import Field, PrivateAttr
-from sqlalchemy import text
-from sqlalchemy.engine import Engine
-from starlette.concurrency import run_in_threadpool
 
 
 def run_sql(sqlalchemy_engine: Engine, sql: str, parameters: dict) -> pd.DataFrame:
@@ -73,8 +74,8 @@ class QueryFunction(BaseFunction):
         lc_messages.append(
             HumanMessage(
                 content=f"""\
-        To answer the previous question, I called a function: {self.id}({deps.arguments})
-        """
+To answer the previous question, I called a function: {self.id}({deps.arguments})
+"""
             )
         )
         lc_messages.append(
@@ -85,7 +86,7 @@ The following table answers the previous question:
 
 Some details about the table:
 {self.description}
-        
+
 Provide a summary based on the data.
 """
             )

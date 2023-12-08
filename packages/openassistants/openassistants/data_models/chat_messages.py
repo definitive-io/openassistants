@@ -1,14 +1,20 @@
 from typing import Annotated, List, Literal, Optional
 
 import pandas as pd
-from langchain.schema import AIMessage, BaseMessage, HumanMessage
+from langchain.schema.messages import (
+    AIMessage,
+    BaseMessage,
+    HumanMessage,
+    merge_content,
+)
+from pydantic import BaseModel, Field
+
 from openassistants.data_models.function_input import FunctionCall, FunctionInputRequest
 from openassistants.data_models.function_output import (
     DataFrameOutput,
     FunctionOutput,
     TextOutput,
 )
-from pydantic import BaseModel, Field
 
 
 class SuggestedPrompt(BaseModel):
@@ -34,8 +40,8 @@ class OpasAssistantMessage(BaseModel):
         default=None,
     )
     function_call: Optional[FunctionCall] = Field(
-        description="informs the client a function call is happening with certain parameters. "
-        "may be shown to the user",
+        description="informs the client a function call is happening "
+        "with certain parameters. may be shown to the user",
         default=None,
     )
 
@@ -50,14 +56,14 @@ def ensure_alternating(chat_history: List[BaseMessage]) -> List[BaseMessage]:
     If theres a repeated role, concatenate the messages.
     """
 
-    fixed = []
+    fixed: List[BaseMessage] = []
 
     message: BaseMessage
     for i, message in enumerate(chat_history):
         if i == 0:
             fixed.append(message)
         elif message.type == fixed[-1].type:
-            fixed[-1].content += "\n" + message.content
+            fixed[-1].content = merge_content(fixed[-1].content, message.content)
         else:
             fixed.append(message)
 
@@ -74,10 +80,12 @@ def opas_to_lc(chat_history, skip_assistant_messages=False) -> List[BaseMessage]
             isinstance(message, OpasAssistantMessage)
             and message.function_call is not None
         ):
+            fname = message.function_call.name
+            fargs = message.function_call.arguments
             lc_messages.append(
                 HumanMessage(
                     content=f"""\
-To answer the previous question, I called a function: {message.function_call.name}({message.function_call.arguments})
+To answer the previous question, I called a function: {fname}({fargs})
 """
                 )
             )
@@ -113,7 +121,8 @@ class OpasFunctionMessage(BaseModel):
     outputs: Annotated[
         List[FunctionOutput],
         Field(
-            description="the outputs of the function. can only be certain types so the client knows how to display it"
+            description="the outputs of the function. "
+            "can only be certain types so the client knows how to display it"
         ),
     ]
 

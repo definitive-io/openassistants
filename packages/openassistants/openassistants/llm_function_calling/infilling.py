@@ -1,7 +1,7 @@
-import json
 from typing import Dict, TypedDict
 
-from langchain.schema.messages import HumanMessage, SystemMessage
+from langchain.schema.messages import HumanMessage
+
 from openassistants.data_models.chat_messages import opas_to_lc
 from openassistants.functions.base import BaseFunction
 from openassistants.llm_function_calling.utils import generate_to_json
@@ -62,7 +62,7 @@ User query: "{user_query}"
 For each of the arguments decide:
 - Should the argument be used?
 - Can we find the right value for the argument from the user query or from previous messages? We need to be able to derive the full correct value for the argument without any additional information.
-"""
+"""  # noqa: E501
         )
     ]
 
