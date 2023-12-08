@@ -1,12 +1,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from openassistants.core.assistant import Assistant
+from openassistants.functions.crud import PythonCRUD
 from openassistants_fastapi.routes import RouteAssistants, create_router
+
+from fast_api_server.find_email_by_name_function import find_email_by_name_function
 
 app = FastAPI()
 
+# create a library with the custom function
+custom_python_lib = PythonCRUD(functions=[find_email_by_name_function])
+
 route_assistants = RouteAssistants(
-    assistants={"hooli": Assistant(libraries=["piedpiper"])}
+    assistants={"hooli": Assistant(libraries=["piedpiper", custom_python_lib])}
 )
 
 api_router = create_router(route_assistants)
