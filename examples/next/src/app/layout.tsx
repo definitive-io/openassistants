@@ -1,10 +1,7 @@
 'use client';
 
-import { Inter } from 'next/font/google';
-import '@openassistants/ui/tailwind-output.css';
 import { Providers } from '@openassistants/ui';
-
-const inter = Inter({ subsets: ['latin'] });
+import "@openassistants/ui/globals.css"
 
 interface RootLayoutProps {
   children: React.ReactNode;
