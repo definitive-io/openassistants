@@ -2,7 +2,7 @@ import asyncio
 from typing import Any, Dict, List, Optional, Tuple
 
 from langchain.chat_models.base import BaseChatModel
-from langchain.chat_models.openai import ChatOpenAI
+from langchain.chat_models import ChatOpenAI, ChatVertexAI
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.embeddings.base import Embeddings
 from langchain.schema import BaseStore
@@ -27,7 +27,7 @@ from openassistants.llm_function_calling.selection import select_function
 from openassistants.utils.async_utils import AsyncStreamVersion
 from openassistants.utils.langchain_util import LangChainCachedEmbeddings
 
-llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.0, max_tokens=1000)
+llm = ChatOpenAI(model_name="gpt-4", temperature=0.0, max_tokens=1000)
 
 
 class Assistant:
@@ -45,7 +45,9 @@ class Assistant:
         function_identification: BaseChatModel = llm,
         function_infilling: BaseChatModel = llm,
         function_summarization: BaseChatModel = llm,
-        entity_embedding_model: Embeddings = LangChainCachedEmbeddings(OpenAIEmbeddings()),
+        entity_embedding_model: Embeddings = LangChainCachedEmbeddings(
+            OpenAIEmbeddings()
+        ),
     ):
         self.function_identification = function_identification
         self.function_infilling = function_infilling
@@ -163,7 +165,6 @@ class Assistant:
                 raise ValueError("function not found")
             selected_function = filtered[0]
 
-
         if selected_function is None:
             function_selection = await select_function(
                 self.function_identification, all_functions, message.content
@@ -206,7 +207,6 @@ class Assistant:
             selected_function_args or {},
             self.entity_embedding_model,
         )
-
 
         # perform argument infilling
         if len(selected_function_arg_json_schema["properties"]) > 0:

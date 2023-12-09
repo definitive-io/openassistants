@@ -2,18 +2,21 @@ import asyncio
 from typing import Annotated, Any, List, Literal, Sequence
 
 import pandas as pd
-from langchain.schema import BaseMessage, HumanMessage
+from langchain.schema import BaseMessage, HumanMessage, AIMessage
 from pydantic import Field, PrivateAttr
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
 from starlette.concurrency import run_in_threadpool
 
 from openassistants.data_models.chat_messages import (
+    OpasAssistantMessage,
+    OpasFunctionMessage,
+    OpasMessage,
     SuggestedPrompt,
     _render_df_for_llm,
     opas_to_lc,
 )
-from openassistants.data_models.function_input import BaseJSONSchema
+from openassistants.data_models.function_input import BaseJSONSchema, FunctionCall
 from openassistants.data_models.function_output import (
     DataFrameOutput,
     FollowUpsOutput,
@@ -24,7 +27,9 @@ from openassistants.data_models.function_output import (
 from openassistants.data_models.serialized_dataframe import SerializedDataFrame
 from openassistants.functions.base import BaseFunction, FunctionExecutionDependency
 from openassistants.functions.visualize import execute_visualization
+from openassistants.utils import yaml
 from openassistants.utils.async_utils import AsyncStreamVersion
+from openassistants.utils.history_representation import opas_to_interactions
 from openassistants.utils.strings import resolve_str_template
 
 
@@ -37,6 +42,28 @@ def run_sql(sqlalchemy_engine: Engine, sql: str, parameters: dict) -> pd.DataFra
         df = pd.DataFrame(result.fetchall())
         df.columns = result.keys()
     return df
+
+
+def _opas_to_summarization_lc(
+    chat_history: List[OpasMessage],
+) -> List[BaseMessage]:
+    lc_messages: List[BaseMessage] = []
+
+    interaction_list = opas_to_interactions(chat_history)
+
+    for interaction in interaction_list:
+        user_serialized_yaml = yaml.dump(
+            interaction.dict(
+                exclude={"function_output_summary"},
+                exclude_none=True,
+            )
+        )
+        lc_messages.append(HumanMessage(content=user_serialized_yaml))
+        # we are trying to predict summarization, so in the few shots, the summarization is the assistants AIMessage
+        if interaction.function_output_summary is not None:
+            lc_messages.append(AIMessage(content=interaction.function_output_summary))
+
+    return lc_messages
 
 
 class QueryFunction(BaseFunction):
@@ -69,26 +96,45 @@ class QueryFunction(BaseFunction):
     async def execute_summarization(
         self, dfs: List[pd.DataFrame], deps: FunctionExecutionDependency
     ) -> AsyncStreamVersion[str]:
-        lc_messages: List[BaseMessage] = opas_to_lc(deps.chat_history, True)
+        chat_continued = [
+            *deps.chat_history,
+            OpasAssistantMessage(
+                content="",
+                function_call=FunctionCall(
+                    name=self.id,
+                    arguments=deps.arguments,
+                ),
+            ),
+            OpasFunctionMessage(
+                name=self.id,
+                outputs=[
+                    DataFrameOutput(dataframe=SerializedDataFrame.from_pd(df))
+                    for df in dfs
+                ],
+            ),
+        ]
 
-        lc_messages.append(
-            HumanMessage(
-                content=f"""\
-To answer the previous question, I called a function: {self.id}({deps.arguments})
+        system_prompt = """\
+You are a helpful assistant
+
+The user invoked functions that provides data to answer the user's prompts.
+
+You will:
+* Summarize the function_output_data to respond to the user_prompt. 
+* Only include statements derived from function_output_data. 
+* Do not reveal the function call to the user.
+* The text will be rendered as markdown.
 """
-            )
-        )
-        lc_messages.append(
-            HumanMessage(
-                content=f"""\
-The following table answers the previous question:
-{_render_df_for_llm(dfs[0])}
 
-Some details about the table:
-{self.description}
+        lc_messages: List[BaseMessage] = [
+            SystemMessage(content=system_prompt)
+        ] + definitive_to_summarization_lc(chat_continued)
 
-Provide a summary based on the data.
-"""
+        # append function description
+        lc_messages[-1].content += "\n" + yaml.dump(  # type: ignore
+            dict(
+                function_description=self.description,
+                summarization_instructions=self.summarization,
             )
         )
 

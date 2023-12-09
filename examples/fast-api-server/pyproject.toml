@@ -11,6 +11,7 @@ openassistants = {path = "../../packages/openassistants", extras = ["duckdb"], d
 openassistants-fastapi = {path = "../../packages/openassistants-fastapi", develop = true}
 fastapi = "^0.104.1"
 uvicorn = "^0.24.0.post1"
+google-cloud-aiplatform = ">=1.36.0"
 
 
 [tool.poetry.group.test.dependencies]
