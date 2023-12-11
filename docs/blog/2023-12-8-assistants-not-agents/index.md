@@ -39,7 +39,7 @@ We're launching with three packages:
 
 The project is built on top of LangChain and we will soon support more sophisticated RAG features based on LlamaIndex. Our goal is to be the open alternative to the AssistantsAPI that can operate against any LLM: both Open Source LLMs like fine-tuned Llama's focused on function calling and proprietary models with e.g. native support for function calling.
 
-![](/img/openassistants.png)
+![](https://github.com/definitive-io/openassistants/assets/1309307/3e7821f4-62d8-42c0-80c7-94be8b3f2e2c)
 
 #### Conclusion
 
