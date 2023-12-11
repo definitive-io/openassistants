@@ -2,7 +2,7 @@
 slug: assistants-not-agents
 title: Assistants not Agents
 authors: [rick, dan]
-tags: [facebook, hello, docusaurus]
+tags: [openassisstants, ai, assistants, agents, llm]
 ---
 
 In the fast-evolving world of AI systems, the distinction between building AI assistants and autonomous agents has become crucial. Recent insights from [Dharmesh Shah](https://agent.ai/p/why-most-agent-ais-dont-work-yet) highlight the inherent challenges with AI agents and why a more focused approach is preferable.
