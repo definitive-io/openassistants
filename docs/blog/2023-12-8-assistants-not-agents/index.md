@@ -13,6 +13,8 @@ AI agents, like those in projects such as AutoGPT and BabyAGI, are designed to f
 
 For instance, if an LLM has a 95% success rate for each task, the cumulative success rate drops alarmingly with each additional task an agent undertakes. The mathematics behind this shows that even with a high individual task success rate, the overall reliability of an agent can diminish rapidly, reducing its effectiveness to a mere coin toss in complex scenarios. This is particularly problematic for general-purpose agents trying to cater to diverse functions.
 
+<blockquote class="twitter-tweet"><p lang="en" dir="ltr">AI agents like that are also prone to all kinds of disastrous security holes that aren&#39;t nearly as harmful to copilots - I think that&#39;s a major reason we haven&#39;t seen a breakout application of that form of agent yet, whereas copilots are being used successfully on a daily basis</p>&mdash; Simon Willison (@simonw) <a href="https://twitter.com/simonw/status/1733916061928686040?ref_src=twsrc%5Etfw">December 10, 2023</a></blockquote>
+
 #### The Advantage of AI Assistants
 
 This is where AI assistants come into the limelight. Unlike their autonomous counterparts, AI assistants are designed to perform specific tasks, one at a time, with human interaction playing a central role. This approach has several advantages:
