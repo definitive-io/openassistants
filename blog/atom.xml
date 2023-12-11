@@ -54,8 +54,10 @@
             <name>Dan Loman</name>
             <uri>https://github.com/dloman118</uri>
         </author>
-        <category label="facebook" term="facebook"/>
-        <category label="hello" term="hello"/>
-        <category label="docusaurus" term="docusaurus"/>
+        <category label="openassisstants" term="openassisstants"/>
+        <category label="ai" term="ai"/>
+        <category label="assistants" term="assistants"/>
+        <category label="agents" term="agents"/>
+        <category label="llm" term="llm"/>
     </entry>
 </feed>
