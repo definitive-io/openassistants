@@ -1,9 +1,10 @@
 [tool.poetry]
-name = "openassistants-fastapi"
+name = "definitive-openassistants-fastapi"
 version = "0.0.1"
 description = ""
 authors = ["Rick Lamers <ricklamers@gmail.com>"]
 readme = "README.md"
+packages = [{include = "openassistants_fastapi"}]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
