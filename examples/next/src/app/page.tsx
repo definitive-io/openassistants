@@ -15,6 +15,10 @@ export default function Home() {
                 title: 'Show recent purchases',
                 prompt: 'Show recent purchases',
               },
+              {
+                title: 'Show spend per product',
+                prompt: 'Show spend per product',
+              },
             ]}
             welcomeMessage="This is a simple starter for deploying a nextjs app with an open assistant chat widget. This is configured to use the example library which builds off a couple csv of employee and purchase data"
             getToken={() => Promise.resolve('token')}

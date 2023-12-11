@@ -1,0 +1,29 @@
+name: spend_per_product
+description: |
+  Show the spend per product (top 5)
+sample_questions:
+- show spend per product
+parameters:
+  json_schema:
+    type: object
+    properties: {}
+    required: []
+type: DuckDBQueryFunction
+dataset: "dummy-data/"
+sqls:
+- |
+  SELECT purchases.product, SUM(purchases.amount) as amount,
+  FROM "purchases.csv"
+  GROUP BY purchases.product
+  ORDER BY amount DESC
+  LIMIT 5
+visualizations:
+  - | 
+      def create_chart_config(dataframes):
+        df = dataframes[0]
+        data = [{'x': df.iloc[:, 0].tolist(), 'y': df.iloc[:, 1].tolist(), 'type': 'bar'}]
+        layout = {'title': 'Spend per Product', 'xaxis': {'title': 'Product'}, 'yaxis': {'title': 'Total Spend'}}
+        result = {'data': data, 'layout': layout}
+
+        return result
+summarization: 'Describe the spend per product'

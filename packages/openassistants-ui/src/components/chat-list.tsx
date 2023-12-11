@@ -4,6 +4,7 @@ import React from 'react';
 import { DataframeTable } from './dataframe-table';
 import { IconSpinner, Separator } from './ui';
 import { OpenAssistantsChatMessage, getContent } from './chat-message';
+import { RenderVisMessage } from './plotly-vis';
 
 export interface DefinitiveChatList {
   messages: Message[];
@@ -37,6 +38,7 @@ export function OpenAssistantsChatList({
           <div key={index}>
             {outputs &&
               outputs.map((output, i) => {
+                console.log(`output.type=${output.type} output=${JSON.stringify(output)}`)
                 return (
                   <div key={`message_${index}_output_${i}`} className="mb-4">
                     {output.type === 'dataframe' && (
@@ -47,7 +49,7 @@ export function OpenAssistantsChatList({
                       ></DataframeTable>
                     )}
                     {output.type === 'visualization' && (
-                      <div>Visualization Not Yet Implemented</div>
+                      <RenderVisMessage id={`message-${index}-output-${i}`} data={output.visualization.data} layout={output.visualization.layout} />
                     )}
                   </div>
                 );
