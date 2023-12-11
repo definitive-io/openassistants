@@ -1,8 +1,8 @@
 # OpenAssistants
 
 [![Documentation](https://img.shields.io/badge/docs-openassistants-blue.svg)](https://definitive-io.github.io/openassistants/)
-[![OpenAssistants PyPI](https://img.shields.io/pypi/v/openassistants.svg)](https://pypi.org/project/openassistants/)
-[![OpenAssistants-FastAPI PyPI](https://img.shields.io/pypi/v/openassistants-fastapi.svg)](https://pypi.org/project/openassistants-fastapi/)
+[![OpenAssistants PyPI](https://img.shields.io/pypi/v/definitive-openassistants.svg)](https://pypi.org/project/definitive-openassistants/)
+[![OpenAssistants-FastAPI PyPI](https://img.shields.io/pypi/v/definitive-openassistants-fastapi.svg)](https://pypi.org/project/definitive-openassistants-fastapi/)
 [![npm version](https://img.shields.io/npm/v/@definitive-io/openassistants-ui)](https://www.npmjs.com/package/@definitive-io/openassistants-ui)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 [![Discord](https://img.shields.io/discord/1182644873992613989.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/Snd4Cry7wD)
