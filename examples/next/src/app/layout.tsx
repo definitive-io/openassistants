@@ -1,7 +1,7 @@
 'use client';
 
-import { Providers } from '@openassistants/ui';
-import "@openassistants/ui/globals.css"
+import { Providers } from '@definitive-io/openassistants-ui';
+import "@definitive-io/openassistants-ui/globals.css"
 
 interface RootLayoutProps {
   children: React.ReactNode;

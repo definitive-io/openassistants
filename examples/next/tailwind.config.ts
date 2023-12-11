@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ['class'],
-  content: ['src/**/*.{ts,tsx}', '../../node_modules/@openassistants/ui/src/**/*.{ts,tsx}'],
+  content: ['src/**/*.{ts,tsx}', '../../node_modules/@definitive-io/openassistants-ui/src/**/*.{ts,tsx}'],
   theme: {
     container: {
       center: true,

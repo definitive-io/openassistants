@@ -1,6 +1,6 @@
 'use client';
 
-import { OpenAssistantsChat } from '@openassistants/ui';
+import { OpenAssistantsChat } from '@definitive-io/openassistants-ui';
 
 export default function Home() {
   return (
