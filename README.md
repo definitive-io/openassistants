@@ -16,6 +16,8 @@ OpenAssistants is a collection of open source libraries aimed at developing robu
 
 OpenAssistants is built on [LangChain](https://github.com/langchain-ai/langchain) and designed to be an open alternative to OpenAI's [Assistants API](https://platform.openai.com/docs/assistants/overview). We also think it's easier to use!
 
+✨ Check out the [**live demo**](https://openassistants-next.vercel.definitivecorp.io/)
+
 Join us in creating AI assistants that are not only useful but dependable for production use today.
 
 ## Features
