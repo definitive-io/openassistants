@@ -44,7 +44,7 @@
 <li><code>openassistants-ui</code> an example chat client that supports rich streaming outputs like tables, plots, form inputs and text.</li>
 </ul>
 <p>The project is built on top of LangChain and we will soon support more sophisticated RAG features based on LlamaIndex. Our goal is to be the open alternative to the AssistantsAPI that can operate against any LLM: both Open Source LLMs like fine-tuned Llama's focused on function calling and proprietary models with e.g. native support for function calling.</p>
-<p><img loading="lazy" src="https://definitive-io.github.io/openassistants/assets/images/openassistants-16feeb0a171a4fa49bae23435f235089.png" width="841" height="683" class="img_ev3q"></p>
+<p><img loading="lazy" src="https://github.com/definitive-io/openassistants/assets/1309307/3e7821f4-62d8-42c0-80c7-94be8b3f2e2c" alt="" class="img_ev3q"></p>
 <h4 class="anchor anchorWithStickyNavbar_LWe7" id="conclusion">Conclusion<a href="https://definitive-io.github.io/openassistants/blog/assistants-not-agents#conclusion" class="hash-link" aria-label="Direct link to Conclusion" title="Direct link to Conclusion">​</a></h4>
 <p>In conclusion, while the allure of fully autonomous AI agents is undeniable, the current state of technology suggests a more measured approach. Building AI assistants that excel in specific tasks and work in harmony with human users is not just practical but also more aligned with our current technological capabilities. This approach promises a more reliable AI experience that leads to experiences that we can actually deploy with confidence in production today.</p>]]></content:encoded>
             <category>facebook</category>
