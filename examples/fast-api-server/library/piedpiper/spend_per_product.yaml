@@ -1,4 +1,4 @@
-name: spend_per_product
+display_name: Spend per product
 description: |
   Show the spend per product (top 5)
 sample_questions:
