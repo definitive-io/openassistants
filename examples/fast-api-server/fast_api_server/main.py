@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from openassistants.core.assistant import Assistant
 from openassistants.functions.crud import PythonCRUD
@@ -28,3 +28,8 @@ app.add_middleware(
 )
 
 app.include_router(api_router)
+
+
+@app.get("/healthz", status_code=status.HTTP_200_OK)
+def health_check():
+    return {"status": "healthy"}
