@@ -29,7 +29,6 @@ Join us in creating AI assistants that are not only useful but dependable for pr
 - Support for 50+ functions in a single chat Assistant
 - Native OpenAI Functions integration
 
-<br>
 <p align="center">
 <br>
  <img src="https://github.com/definitive-io/openassistants/assets/1309307/3e7821f4-62d8-42c0-80c7-94be8b3f2e2c" />
