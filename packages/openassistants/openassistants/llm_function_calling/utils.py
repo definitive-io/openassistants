@@ -1,23 +1,20 @@
 import json
+from typing import Optional
 
 import numpy as np
 from langchain.chat_models.base import BaseChatModel
 from langchain.chat_models.openai import ChatOpenAI
-from langchain.schema.messages import SystemMessage
+from langchain.schema.messages import BaseMessage, SystemMessage
 
 from openassistants.data_models.chat_messages import ensure_alternating
-from openassistants.utils.langchain import is_openai
+from openassistants.utils.langchain_util import openai_function_call_enabled
 
 OUTPUT_FORMAT_INSTRUCTION = """\
-The output should be formatted as a JSON instance that conforms to the JSON schema below.
+You are a helpful assistant.
 
-As an example, for the schema {{"properties": {{"foo": {{"title": "Foo", "description": "a list of strings", "type": "array", "items": {{"type": "string"}}}}}}, "required": ["foo"]}}
-
-the object {{"foo": ["bar", "baz"]}} is a well-formatted instance of the schema. The object {{"properties": {{"foo": ["bar", "baz"]}}}} is not well-formatted.
+Your responses MUST be formatted as a valid JSON instance that conforms to the JSON schema below.
 
 {schema}
-
-Always return a valid JSON object instance.
 """  # noqa: E501
 
 
@@ -35,26 +32,42 @@ def find_json_substring(s):
 
 
 async def generate_to_json(
-    chat: BaseChatModel, messages, output_json_schema, task_name: str
+    chat: BaseChatModel,
+    messages,
+    output_json_schema: Optional[dict],
+    task_name: str,
+    tags: Optional[list[str]] = None,
 ) -> dict:
-    if is_openai(chat):
+    if output_json_schema is not None and openai_function_call_enabled(chat):
         assert isinstance(chat, ChatOpenAI)
         return await generate_to_json_openai(
-            chat, messages, output_json_schema, task_name
+            chat, messages, output_json_schema, task_name, tags or []
         )
     else:
-        return await generate_to_json_generic(chat, messages, output_json_schema)
-
-
-async def generate_to_json_generic(chat, messages, output_json_schema) -> dict:
-    system_message = SystemMessage(
-        content=OUTPUT_FORMAT_INSTRUCTION.format(
-            schema=json.dumps(output_json_schema, indent=4)
+        return await generate_to_json_generic(
+            chat, messages, output_json_schema, tags or []
         )
-    )
+
+
+async def generate_to_json_generic(
+    chat,
+    messages: list[BaseMessage],
+    output_json_schema: Optional[dict],
+    tags: list[str],
+) -> dict:
+    if output_json_schema is not None:
+        system_message = SystemMessage(
+            content=OUTPUT_FORMAT_INSTRUCTION.format(
+                schema=json.dumps(output_json_schema, indent=4)
+            )
+        )
+    else:
+        system_message = SystemMessage(
+            content="You are a helpful assistant. You will respond in JSON"
+        )
 
     messages = [system_message] + messages
-    response = await chat.ainvoke(ensure_alternating(messages))
+    response = await chat.ainvoke(ensure_alternating(messages), {"tags": tags})
     content = response.content
 
     json_substring = find_json_substring(content)
@@ -63,15 +76,21 @@ async def generate_to_json_generic(chat, messages, output_json_schema) -> dict:
             output_message = json.loads(json_substring)
             return output_message
         except json.JSONDecodeError as e:
-            print("Failed to decode JSON:", e, "\nResponse content:", content)
-            return {}
+            raise ValueError(
+                f"Failed to decode JSON: {e}\nResponse content: {content}"
+            ) from e
     else:
-        print("No JSON content found in response.")
-        return {}
+        raise ValueError(
+            f"Could not find JSON substring in response content: {content}"
+        )
 
 
 async def generate_to_json_openai(
-    chat: ChatOpenAI, messages, output_json_schema: dict, task_name: str
+    chat: ChatOpenAI,
+    messages: list[BaseMessage],
+    output_json_schema: dict,
+    task_name: str,
+    tags: list[str],
 ) -> dict:
     system_message = SystemMessage(content="You are a helpful assistant.")
     messages = [system_message] + messages
@@ -79,11 +98,12 @@ async def generate_to_json_openai(
 
     response = await chat.ainvoke(
         messages,
+        {"tags": tags},
         functions=[
             {
                 "type": "function",
                 "name": task_name,
-                "description": "Get the current weather in a given location",
+                "description": task_name,
                 "parameters": output_json_schema,
             }
         ],
@@ -105,3 +125,5 @@ async def generate_to_json_openai(
             return json.loads(function_call["arguments"])
         except json.JSONDecodeError as e:
             raise e
+
+    raise ValueError("No function call in response")

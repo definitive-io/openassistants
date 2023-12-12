@@ -1,10 +1,11 @@
+from copy import deepcopy
 from typing import Dict, List, TypedDict
 
 from langchain.chat_models.base import BaseChatModel
 from langchain.schema.messages import HumanMessage
 
 from openassistants.data_models.chat_messages import OpasMessage, OpasUserMessage
-from openassistants.functions.base import BaseFunction
+from openassistants.functions.base import BaseFunction, Entity
 from openassistants.llm_function_calling.utils import generate_to_json
 from openassistants.utils import yaml
 from openassistants.utils.history_representation import opas_to_interactions
@@ -98,7 +99,10 @@ ArgumentDecisionDict = Dict[str, NestedObject]
 
 
 async def generate_argument_decisions(
-    function: BaseFunction, chat, user_query, chat_history
+    function: BaseFunction,
+    chat: BaseChatModel,
+    user_query: str,
+    chat_history: List[OpasUserMessage],
 ) -> ArgumentDecisionDict:
     json_schema = await generate_argument_decisions_schema(function)
 
@@ -113,15 +117,28 @@ We are analyzing the following function:
 For each of the arguments decide:
 - Should the argument be used?
 - Can we find the right value for the argument from the user_prompt or from CHAT HISTORY?
+
+Respond in JSON.
 """  # noqa: E501
         )
     ]
 
     result = await generate_to_json(
-        chat, final_messages, json_schema, "generate_argument_decisions"
+        chat,
+        final_messages,
+        json_schema,
+        "generate_argument_decisions",
+        tags=["generate_argument_decisions"],
     )
 
     return result
+
+
+def entity_to_json_schema_obj(entity: Entity):
+    d = {"const": entity.identity}
+    if entity.description is not None:
+        d["description"] = entity.description
+    return d
 
 
 async def generate_arguments(
@@ -129,8 +146,16 @@ async def generate_arguments(
     chat: BaseChatModel,
     user_query: str,
     chat_history: List[OpasUserMessage],
+    entities_info: Dict[str, List[Entity]],
 ) -> dict:
-    json_schema = await function.get_parameters_json_schema()
+    json_schema = deepcopy(await function.get_parameters_json_schema())
+
+    # inject the parameter entity definitions
+    for param, entities in entities_info.items():
+        json_schema.setdefault("definitions", {})[param] = {
+            "oneOf": [entity_to_json_schema_obj(entity) for entity in entities]
+        }
+        json_schema["properties"][param] |= {"$ref": f"#/definitions/{param}"}
 
     final_messages = [
         HumanMessage(
@@ -140,13 +165,19 @@ async def generate_arguments(
 We want to invoke the following function:
 {await function.get_signature()}
 
-Provide the arguments for the function call that match the user_prompt in JSON.
+Provide the arguments for the function call that match the user_prompt.
+
+Respond in JSON.
 """
         ),
     ]
 
     result = await generate_to_json(
-        chat, final_messages, json_schema, "generate_arguments"
+        chat,
+        final_messages,
+        json_schema,
+        "generate_arguments",
+        tags=["generate_arguments"],
     )
 
     return result

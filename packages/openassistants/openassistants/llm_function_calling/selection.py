@@ -1,8 +1,9 @@
 import asyncio
-from typing import List, Optional
+import json
+from typing import Any, Dict, List, Optional
 
 from langchain.chat_models.base import BaseChatModel
-from langchain.schema.messages import HumanMessage
+from langchain.schema.messages import HumanMessage, SystemMessage
 from pydantic import BaseModel
 
 from openassistants.functions.base import BaseFunction
@@ -26,12 +27,21 @@ async def filter_functions(
     messages = [
         HumanMessage(
             content=f"""{functions_text}
-Which of these functions is most suitable given the user query: "{user_query}"?"""
+Which of these functions is most suitable given the user query: "{user_query}"?
+
+Respond in JSON.
+"""
         ),
     ]
 
     function_names = (
-        await generate_to_json(chat, messages, json_schema, "filter_functions")
+        await generate_to_json(
+            chat,
+            messages,
+            json_schema,
+            "filter_functions",
+            tags=["select_function_pre"],
+        )
     ).get("function_name")
 
     return function_names
@@ -76,10 +86,6 @@ async def select_function(
             "function_name": {"type": "string"},
             "suggested_function_names": {"type": "array", "items": {"type": "string"}},
         },
-        "anyOf": [
-            {"required": ["function_name"]},
-            {"required": ["suggested_function_names"]},
-        ],
     }
 
     selection_messages = [
@@ -95,16 +101,23 @@ Action: select related functions from the list of candidates as the 'suggested_f
 
 First decide which of the two scenarios is the case. Then take the appropriate action.
 
-Given the user query: "{user_query}", which of these functions is the best match?"""  # noqa: E501
+Given the user query: "{user_query}", which of these functions is the best match?
+
+Respond in JSON.
+"""  # noqa: E501
         ),
     ]
 
     json_result = await generate_to_json(
-        chat, selection_messages, json_schema, "select_function"
+        chat,
+        selection_messages,
+        json_schema,
+        "select_function",
+        tags=["select_function"],
     )
 
     function_name = json_result.get("function_name")
-    suggested_function_names = json_result.get("suggested_function_names", [])
+    suggested_function_names = json_result.get("related_function_names", [])
 
     selected_function = next(
         (f for f in selected_functions if f.get_function_name() == function_name), None
@@ -116,5 +129,6 @@ Given the user query: "{user_query}", which of these functions is the best match
     ] or None
 
     return SelectFunctionResult(
-        function=selected_function, suggested_functions=suggested_functions
+        function=selected_function,
+        suggested_functions=suggested_functions,
     )

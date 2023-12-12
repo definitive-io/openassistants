@@ -1,15 +1,14 @@
 import abc
 import dataclasses
 import textwrap
-from typing import List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence
 
 from langchain.chat_models.base import BaseChatModel
-from pydantic import BaseModel
-
 from openassistants.data_models.chat_messages import OpasMessage
 from openassistants.data_models.function_output import FunctionOutput
 from openassistants.functions.utils import AsyncStreamVersion
 from openassistants.utils.json_schema import PyRepr
+from pydantic import BaseModel
 
 
 @dataclasses.dataclass
@@ -17,6 +16,15 @@ class FunctionExecutionDependency:
     chat_history: List[OpasMessage]
     arguments: dict
     summarization_chat_model: BaseChatModel
+
+
+class Entity(BaseModel):
+    identity: str
+    description: Optional[str] = None
+
+
+class EntityConfig(BaseModel):
+    entities: List[Entity]
 
 
 class BaseFunction(BaseModel, abc.ABC):
@@ -60,3 +68,6 @@ def {self.id}({params_repr}) -> pd.DataFrame:
 
     def get_function_name(self) -> str:
         return f"{self.id}"
+
+    async def get_entity_configs(self) -> Dict[str, EntityConfig]:
+        return {}
