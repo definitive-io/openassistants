@@ -1,14 +1,15 @@
 import abc
 import dataclasses
 import textwrap
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Dict, List, Optional, Sequence
 
 from langchain.chat_models.base import BaseChatModel
+from pydantic import BaseModel
+
 from openassistants.data_models.chat_messages import OpasMessage
 from openassistants.data_models.function_output import FunctionOutput
 from openassistants.functions.utils import AsyncStreamVersion
 from openassistants.utils.json_schema import PyRepr
-from pydantic import BaseModel
 
 
 @dataclasses.dataclass
@@ -57,11 +58,19 @@ class BaseFunction(BaseModel, abc.ABC):
         # convert JSON Schema types to Python types signature
         params_repr = PyRepr.repr_json_schema(json_schema)
 
+        sample_question_text = "\n".join(f"* {q}" for q in self.sample_questions)
+
+        documentation = f"""\
+{self.description}
+Example Questions:
+{sample_question_text}
+"""
+
         # Construct the function signature
         signature = f"""\
 def {self.id}({params_repr}) -> pd.DataFrame:
     \"\"\"
-{textwrap.indent(self.description, "    ")}
+{textwrap.indent(documentation, "    ")}
     \"\"\"
 """
         return signature
