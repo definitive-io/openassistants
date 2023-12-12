@@ -26,7 +26,7 @@ class LangChainCachedEmbeddings(Embeddings):
     """
     A wrapper around a langchain Embedder that caches the embeddings in a store.
     Default store is a LocalFileStore, but can be switched to Redis in a production environment.
-    """
+    """  # noqa: E501
 
     def __init__(
         self,

@@ -20,6 +20,7 @@ async def _execute(
 
     # load csv
     df = await anyio.to_thread.run_sync(pd.read_csv, "dummy-data/employees.csv")
+    assert isinstance(df, pd.DataFrame)
 
     # find email where csv.name == name
     filtered = df[df["name"] == name]["email"]
@@ -37,6 +38,7 @@ async def _execute(
 
 async def _get_entity_configs() -> dict[str, EntityConfig]:
     df = await anyio.to_thread.run_sync(pd.read_csv, "dummy-data/employees.csv")
+    assert isinstance(df, pd.DataFrame)
 
     records = df.to_dict("records")
 
@@ -68,7 +70,7 @@ find_email_by_name_function = PythonCallableFunction(
             "properties": {
                 "name": {
                     "type": "string",
-                    "description": "The name of the person to find the email address for",
+                    "description": "The name of the person to find the email address for",  # noqa: E501
                 }
             },
             "required": ["name"],

@@ -109,8 +109,8 @@ async def generate_argument_decisions(
     final_messages = [
         HumanMessage(
             content=f"""
-{_build_chat_history_prompt(chat_history)}            
-            
+{_build_chat_history_prompt(chat_history)}
+
 We are analyzing the following function:
 {await function.get_signature()}
 
@@ -160,8 +160,8 @@ async def generate_arguments(
     final_messages = [
         HumanMessage(
             content=f"""
-{_build_chat_history_prompt(chat_history)}            
-            
+{_build_chat_history_prompt(chat_history)}
+
 We want to invoke the following function:
 {await function.get_signature()}
 

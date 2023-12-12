@@ -1,9 +1,8 @@
 import asyncio
-import json
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 from langchain.chat_models.base import BaseChatModel
-from langchain.schema.messages import HumanMessage, SystemMessage
+from langchain.schema.messages import HumanMessage
 from pydantic import BaseModel
 
 from openassistants.functions.base import BaseFunction
