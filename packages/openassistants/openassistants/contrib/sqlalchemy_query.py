@@ -58,7 +58,7 @@ def _opas_to_summarization_lc(
             ),
         )
         lc_messages.append(HumanMessage(content=user_serialized_yaml))
-        # we are trying to predict summarization, so in the few shots, the summarization is the assistants AIMessage
+        # we are trying to predict summarization, so in the few shots, the summarization is the assistants AIMessage  # noqa: E501
         if interaction.function_output_summary is not None:
             lc_messages.append(AIMessage(content=interaction.function_output_summary))
 

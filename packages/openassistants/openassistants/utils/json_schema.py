@@ -96,7 +96,8 @@ class PyRepr(NodeRepr):
         }
         type_mapping = mapping[scalar_node.scalar_type]
         return type_mapping.get(
-            scalar_node.scalar_format, type_mapping[None]
+            scalar_node.scalar_format,
+            type_mapping[None],
         )  # type: ignore
 
     @classmethod

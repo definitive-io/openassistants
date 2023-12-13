@@ -73,6 +73,13 @@ class Assistant:
             self._cached_all_functions = functions
         return self._cached_all_functions
 
+    async def get_function_by_id(self, function_id: str) -> Optional[BaseFunction]:
+        functions = await self.get_all_functions()
+        for function in functions:
+            if function.id == function_id:
+                return function
+        return None
+
     async def execute_function(
         self,
         function: BaseFunction,
