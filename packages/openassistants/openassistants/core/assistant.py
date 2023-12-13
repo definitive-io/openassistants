@@ -19,6 +19,7 @@ from openassistants.functions.base import (
 )
 from openassistants.functions.crud import FunctionCRUD, LocalCRUD
 from openassistants.llm_function_calling.entity_resolution import resolve_entities
+from openassistants.llm_function_calling.fallback import perform_general_qa
 from openassistants.llm_function_calling.infilling import (
     generate_argument_decisions,
     generate_arguments,
@@ -32,8 +33,10 @@ class Assistant:
     function_identification: BaseChatModel
     function_infilling: BaseChatModel
     function_summarization: BaseChatModel
+    function_fallback: BaseChatModel
     entity_embedding_model: Embeddings
     function_libraries: List[FunctionCRUD]
+    scope_description: str
 
     _cached_all_functions: List[BaseFunction]
 
@@ -43,7 +46,9 @@ class Assistant:
         function_identification: Optional[BaseChatModel] = None,
         function_infilling: Optional[BaseChatModel] = None,
         function_summarization: Optional[BaseChatModel] = None,
+        function_fallback: Optional[BaseChatModel] = None,
         entity_embedding_model: Optional[Embeddings] = None,
+        scope_description: str = "General assistant.",
     ):
         # instantiate dynamically vs as default args
         self.function_identification = function_identification or ChatOpenAI(
@@ -55,6 +60,11 @@ class Assistant:
         self.function_summarization = function_summarization or ChatOpenAI(
             model="gpt-3.5-turbo-16k", temperature=0.0, max_tokens=1024
         )
+        self.function_fallback = function_fallback or ChatOpenAI(
+            model="gpt-4-1106-preview", temperature=0.2, max_tokens=1024
+        )
+        self.scope_description = scope_description
+
         self.entity_embedding_model = (
             entity_embedding_model or LangChainCachedEmbeddings(OpenAIEmbeddings())
         )
@@ -169,6 +179,8 @@ class Assistant:
         force_select_function: Optional[str],
     ) -> AsyncStreamVersion[List[OpasMessage]]:
         selected_function: Optional[BaseFunction] = None
+        # perform entity resolution
+        chat_history: List[OpasMessage] = dependencies.get("chat_history")  # type: ignore
 
         # Perform function selection
         if force_select_function is not None:
@@ -201,19 +213,33 @@ class Assistant:
                 ]
                 return
             else:
-                yield [
-                    OpasAssistantMessage(
-                        content="No function matching that question was found."
-                    )
-                ]
+                # In case no function was found and no suggested functions were found
+                # attempt to directly perform the request requested by the user.
+                fb_function_call_invocation = OpasAssistantMessage(
+                    content="",
+                    function_call=FunctionCall(name="fallback-function", arguments={}),
+                )
+                yield [fb_function_call_invocation]
+
+                async for output in perform_general_qa(
+                    chat=self.function_fallback,
+                    chat_history=dependencies.get("chat_history"),
+                    user_query=message.content,
+                    scope_description=self.scope_description,
+                ):
+                    yield [
+                        fb_function_call_invocation,
+                        OpasFunctionMessage(
+                            name="fallback-function", outputs=list(output)
+                        ),
+                    ]
+
                 return
 
         selected_function_arg_json_schema = (
             await selected_function.get_parameters_json_schema()
         )
 
-        # perform entity resolution
-        chat_history: List[OpasMessage] = dependencies.get("chat_history")  # type: ignore
         entities_info = await resolve_entities(
             selected_function,
             self.function_infilling,

@@ -3,60 +3,12 @@ from typing import Dict, List, TypedDict
 
 from langchain.chat_models.base import BaseChatModel
 from langchain.schema.messages import HumanMessage
-from openassistants.data_models.chat_messages import OpasMessage, OpasUserMessage
+from openassistants.data_models.chat_messages import OpasMessage
 from openassistants.functions.base import BaseFunction, Entity
-from openassistants.llm_function_calling.utils import generate_to_json
-from openassistants.utils import yaml
-from openassistants.utils.history_representation import opas_to_interactions
-
-
-def _build_chat_history_prompt(chat_history: List[OpasMessage]) -> str:
-    """
-    Build a string that looks like
-
-    CHAT HISTORY
-    ---
-    user_prompt: ...
-    function_name: ...
-    function_arguments: ...
-    function_output_data: ...
-    ---
-    user: ...
-    ---
-    END OF CHAT HISTORY
-    """
-
-    previous_history, last_message = chat_history[:-1], chat_history[-1]
-
-    assert isinstance(last_message, OpasUserMessage)
-
-    interactions = opas_to_interactions(previous_history)
-
-    interactions_dicts = [
-        interaction.model_dump(
-            mode="json",
-            include={
-                "user_prompt",
-                "assistant_response",
-                "function_name",
-                "function_arguments",
-                "function_output_data",
-                "function_output_summary",
-            },
-            exclude_none=True,
-        )
-        for interaction in interactions
-    ] + [{"user_prompt": last_message.content.strip()}]
-
-    message_yaml_str = yaml.dumps_all(interactions_dicts)
-
-    return f"""\
-CHAT HISTORY
----
-{message_yaml_str.strip()}
----
-END OF CHAT HISTORY
-"""
+from openassistants.llm_function_calling.utils import (
+    build_chat_history_prompt,
+    generate_to_json,
+)
 
 
 async def generate_argument_decisions_schema(function: BaseFunction):
@@ -108,7 +60,7 @@ async def generate_argument_decisions(
     final_messages = [
         HumanMessage(
             content=f"""
-{_build_chat_history_prompt(chat_history)}
+{build_chat_history_prompt(chat_history)}
 
 We are analyzing the following function:
 {await function.get_signature()}
@@ -159,7 +111,7 @@ async def generate_arguments(
     final_messages = [
         HumanMessage(
             content=f"""
-{_build_chat_history_prompt(chat_history)}
+{build_chat_history_prompt(chat_history)}
 
 We want to invoke the following function:
 {await function.get_signature()}

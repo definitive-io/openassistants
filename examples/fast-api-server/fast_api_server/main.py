@@ -11,7 +11,11 @@ app = FastAPI()
 # create a library with the custom function
 custom_python_lib = PythonCRUD(functions=[find_email_by_name_function])
 
-hooli_assistant = Assistant(libraries=["piedpiper", custom_python_lib])
+hooli_assistant = Assistant(
+    libraries=["piedpiper", custom_python_lib],
+    scope_description="""Only answer questions about Hooli company related matters.
+Also answer question that refers anything in the current chat history.""",
+)
 
 route_assistants = RouteAssistants(assistants={"hooli": hooli_assistant})
 
