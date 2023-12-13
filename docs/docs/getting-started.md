@@ -69,7 +69,7 @@ python_code: |
 
 Once the functions have been defined we can connect to the REST API using the default UI client.
 
-First, navigate to `examples/fast-api-server` to start the backend example:
+First, navigate to `examples/fast-api-server` to start the example backend:
 
 ```bash
 poetry install
