@@ -3,11 +3,6 @@ from typing import Annotated, Any, List, Literal, Sequence
 
 import pandas as pd
 from langchain.schema import AIMessage, BaseMessage, HumanMessage, SystemMessage
-from pydantic import Field, PrivateAttr
-from sqlalchemy import text
-from sqlalchemy.engine import Engine
-from starlette.concurrency import run_in_threadpool
-
 from openassistants.data_models.chat_messages import (
     OpasAssistantMessage,
     OpasFunctionMessage,
@@ -29,6 +24,10 @@ from openassistants.utils import yaml
 from openassistants.utils.async_utils import AsyncStreamVersion
 from openassistants.utils.history_representation import opas_to_interactions
 from openassistants.utils.strings import resolve_str_template
+from pydantic import Field, PrivateAttr
+from sqlalchemy import text
+from sqlalchemy.engine import Engine
+from starlette.concurrency import run_in_threadpool
 
 
 def run_sql(sqlalchemy_engine: Engine, sql: str, parameters: dict) -> pd.DataFrame:
