@@ -42,7 +42,7 @@ To run the project locally:
 - Navigate to `examples/fast-api-server` to start the **backend** example:
   - Run `poetry install`
   - Activate the virtual environment with `poetry shell`
-  - Set OPEN_API_KEY env var with `export OPEN_API_KEY=sk-my-key`
+  - Set OPENAI_API_KEY env var with `export OPENAI_API_KEY=sk-my-key`
   - Start the server with `./run.sh`
 
 - Then, go to `examples/next` to start the **frontend** example:
