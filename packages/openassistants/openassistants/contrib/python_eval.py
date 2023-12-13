@@ -1,12 +1,11 @@
 import inspect
 from typing import Any, Callable, Dict, List, Literal, Sequence
 
-from pydantic import TypeAdapter
-
 from openassistants.data_models.function_input import BaseJSONSchema
 from openassistants.data_models.function_output import FunctionOutput
 from openassistants.functions.base import BaseFunction, FunctionExecutionDependency
 from openassistants.functions.utils import AsyncStreamVersion
+from pydantic import TypeAdapter
 
 
 class PythonEvalFunction(BaseFunction):

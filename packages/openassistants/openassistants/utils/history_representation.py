@@ -1,8 +1,6 @@
 from typing import Any, List, Optional
 
 import pandas as pd
-from pydantic import BaseModel
-
 from openassistants.data_models.chat_messages import (
     OpasAssistantMessage,
     OpasFunctionMessage,
@@ -10,6 +8,7 @@ from openassistants.data_models.chat_messages import (
     OpasUserMessage,
 )
 from openassistants.data_models.function_output import DataFrameOutput, TextOutput
+from pydantic import BaseModel
 
 
 def _render_df_for_llm(df: pd.DataFrame) -> str:

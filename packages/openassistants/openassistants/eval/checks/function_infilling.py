@@ -1,5 +1,4 @@
 import jsonschema
-
 from openassistants.eval.interaction import (
     BaseResponseChecker,
     FunctionInteractionResponse,

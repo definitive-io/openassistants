@@ -5,7 +5,6 @@ from langchain.chat_models.base import BaseChatModel
 from langchain.chat_models.openai import ChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.embeddings.base import Embeddings
-
 from openassistants.data_models.chat_messages import (
     OpasAssistantMessage,
     OpasFunctionMessage,

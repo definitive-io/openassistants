@@ -3,7 +3,6 @@ from typing import Dict, List, TypedDict
 
 from langchain.chat_models.base import BaseChatModel
 from langchain.schema.messages import HumanMessage
-
 from openassistants.data_models.chat_messages import OpasMessage, OpasUserMessage
 from openassistants.functions.base import BaseFunction, Entity
 from openassistants.llm_function_calling.utils import generate_to_json

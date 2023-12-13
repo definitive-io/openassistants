@@ -1,10 +1,9 @@
 import pytest
+from fast_api_server.main import hooli_assistant
 from openassistants.eval.base import PatternValidation, json_schema
 from openassistants.eval.checks.function_infilling import FunctionInfillingCheck
 from openassistants.eval.checks.function_selection import FunctionSelectionCheck
 from openassistants.eval.interaction import FunctionInteraction
-
-from fast_api_server.main import hooli_assistant
 
 core_interaction = FunctionInteraction(
     message="Show me some recent purchases",

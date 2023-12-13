@@ -6,8 +6,9 @@ from openassistants.core.assistant import Assistant
 from openassistants.data_models.chat_messages import OpasMessage
 from openassistants.functions.base import BaseFunction
 from openassistants.utils.async_utils import last_value
-from openassistants_fastapi.utils.sse import AsyncStreamVersion, sse_json_patch
 from pydantic import BaseModel, Field
+
+from openassistants_fastapi.utils.sse import AsyncStreamVersion, sse_json_patch
 
 
 @dataclasses.dataclass

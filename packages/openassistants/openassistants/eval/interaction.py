@@ -3,8 +3,6 @@ import asyncio
 import textwrap
 from typing import Any, Dict, List, Literal, Tuple
 
-from pydantic import BaseModel, ConfigDict
-
 from openassistants.core.assistant import Assistant
 from openassistants.data_models.chat_messages import (
     OpasAssistantMessage,
@@ -16,6 +14,7 @@ from openassistants.data_models.function_input import FunctionCall
 from openassistants.data_models.function_output import DataFrameOutput, TextOutput
 from openassistants.functions.base import BaseFunction
 from openassistants.utils.async_utils import last_value
+from pydantic import BaseModel, ConfigDict
 
 
 class InteractionCheckError(Exception):

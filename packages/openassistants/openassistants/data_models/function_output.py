@@ -1,8 +1,7 @@
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, Field
-
 from openassistants.data_models.serialized_dataframe import SerializedDataFrame
+from pydantic import BaseModel, Field
 
 
 class SuggestedPrompt(BaseModel):

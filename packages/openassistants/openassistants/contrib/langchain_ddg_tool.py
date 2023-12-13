@@ -1,7 +1,6 @@
 from typing import Literal, Sequence
 
 from langchain.tools.ddg_search import DuckDuckGoSearchRun
-
 from openassistants.data_models.function_input import BaseJSONSchema
 from openassistants.data_models.function_output import FunctionOutput, TextOutput
 from openassistants.functions.base import BaseFunction, FunctionExecutionDependency
