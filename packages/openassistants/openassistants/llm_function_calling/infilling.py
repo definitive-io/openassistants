@@ -102,14 +102,14 @@ async def generate_argument_decisions(
     function: BaseFunction,
     chat: BaseChatModel,
     user_query: str,
-    chat_history: List[OpasUserMessage],
+    chat_history: List[OpasMessage],
 ) -> ArgumentDecisionDict:
     json_schema = await generate_argument_decisions_schema(function)
 
     final_messages = [
         HumanMessage(
             content=f"""
-{_build_chat_history_prompt(chat_history)}            
+{_build_chat_history_prompt(chat_history)}
             
 We are analyzing the following function:
 {await function.get_signature()}
@@ -145,7 +145,7 @@ async def generate_arguments(
     function: BaseFunction,
     chat: BaseChatModel,
     user_query: str,
-    chat_history: List[OpasUserMessage],
+    chat_history: List[OpasMessage],
     entities_info: Dict[str, List[Entity]],
 ) -> dict:
     json_schema = deepcopy(await function.get_parameters_json_schema())

@@ -9,7 +9,7 @@ from openassistants.functions.base import FunctionExecutionDependency
 
 
 class DuckDBQueryFunction(QueryFunction):
-    type: Literal["DuckDBQueryFunction"] = "DuckDBQueryFunction"  # type ignore
+    type: Literal["DuckDBQueryFunction"] = "DuckDBQueryFunction"  # type: ignore
     dataset: str
 
     def __init__(self, *args, **kwargs):

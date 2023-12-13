@@ -1,5 +1,5 @@
 import asyncio
-from typing import Annotated, Any, List, Literal, Sequence
+from typing import Annotated, Any, Dict, List, Literal, Sequence, Union
 
 import pandas as pd
 from langchain.schema import AIMessage, BaseMessage, HumanMessage, SystemMessage
@@ -12,13 +12,14 @@ from openassistants.data_models.chat_messages import (
     OpasAssistantMessage,
     OpasFunctionMessage,
     OpasMessage,
-    SuggestedPrompt,
+    merge_content,
 )
 from openassistants.data_models.function_input import BaseJSONSchema, FunctionCall
 from openassistants.data_models.function_output import (
     DataFrameOutput,
     FollowUpsOutput,
     FunctionOutput,
+    SuggestedPrompt,
     TextOutput,
     VisualizationOutput,
 )
@@ -35,10 +36,9 @@ def run_sql(sqlalchemy_engine: Engine, sql: str, parameters: dict) -> pd.DataFra
     with sqlalchemy_engine.connect() as connection:
         # Use SQLAlchemy's text function to create a SQL expression
         # Bind parameters to the SQL expression to prevent SQL injection
-        sql = text(sql)
-        result = connection.execute(sql, parameters)
+        result = connection.execute(text(sql), parameters)
         df = pd.DataFrame(result.fetchall())
-        df.columns = result.keys()
+        df.columns = pd.Index([str(key) for key in result.keys()])
     return df
 
 
@@ -138,13 +138,13 @@ You will:
             ),
         )
 
-        full = ""
+        full: Union[str, List[Union[str, Dict]]] = ""
 
         async for response_message in deps.summarization_chat_model.astream(
             lc_messages,
             {"tags": ["summarization"]},
         ):
-            full += response_message.content
+            full = merge_content(full, response_message.content)
             yield full
 
     async def execute(

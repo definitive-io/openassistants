@@ -5,7 +5,8 @@ from langchain.chat_models.base import BaseChatModel
 from langchain.embeddings.base import Embeddings
 from langchain.schema import Document
 from langchain.vectorstores.usearch import USearch
-from openassistants.data_models.chat_messages import OpasUserMessage
+
+from openassistants.data_models.chat_messages import OpasMessage
 from openassistants.functions.base import BaseFunction, Entity, EntityConfig
 from openassistants.llm_function_calling.infilling import generate_arguments
 
@@ -55,7 +56,7 @@ async def resolve_entities(
     function_infilling_llm: BaseChatModel,
     embeddings: Embeddings,
     user_query: str,
-    chat_history: List[OpasUserMessage],
+    chat_history: List[OpasMessage],
 ) -> Dict[str, List[Entity]]:
     entity_configs = await function.get_entity_configs()
 

@@ -48,13 +48,13 @@ class Assistant:
     ):
         # instantiate dynamically vs as default args
         self.function_identification = function_identification or ChatOpenAI(
-            model_name="gpt-3.5-turbo-16k", temperature=0.0, max_tokens=128
+            model="gpt-3.5-turbo-16k", temperature=0.0, max_tokens=128
         )
         self.function_infilling = function_infilling or ChatOpenAI(
-            model_name="gpt-3.5-turbo-16k", temperature=0.0, max_tokens=128
+            model="gpt-3.5-turbo-16k", temperature=0.0, max_tokens=128
         )
         self.function_summarization = function_summarization or ChatOpenAI(
-            model_name="gpt-3.5-turbo-16k", temperature=0.0, max_tokens=1024
+            model="gpt-3.5-turbo-16k", temperature=0.0, max_tokens=1024
         )
         self.entity_embedding_model = (
             entity_embedding_model or LangChainCachedEmbeddings(OpenAIEmbeddings())
@@ -106,12 +106,13 @@ class Assistant:
         entities_info: Dict[str, List[Entity]],
     ) -> Tuple[bool, dict]:
         # Perform infilling and generate argument decisions in parallel
+        chat_history: List[OpasMessage] = dependencies.get("chat_history")  # type: ignore
         arguments_future = asyncio.create_task(
             generate_arguments(
                 selected_function,
                 self.function_infilling,
                 message.content,
-                dependencies.get("chat_history"),
+                chat_history,
                 entities_info,
             )
         )
@@ -120,7 +121,7 @@ class Assistant:
                 selected_function,
                 self.function_infilling,
                 message.content,
-                dependencies.get("chat_history"),
+                chat_history,
             )
         )
         arguments = await arguments_future
@@ -206,12 +207,13 @@ class Assistant:
         )
 
         # perform entity resolution
+        chat_history: List[OpasMessage] = dependencies.get("chat_history")  # type: ignore
         entities_info = await resolve_entities(
             selected_function,
             self.function_infilling,
             self.entity_embedding_model,
             message.content,
-            dependencies.get("chat_history"),
+            chat_history,
         )
 
         # perform argument infilling
