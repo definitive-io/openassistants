@@ -3,7 +3,6 @@ from typing import Dict, List, TypedDict
 
 from langchain.chat_models.base import BaseChatModel
 from langchain.schema.messages import HumanMessage
-
 from openassistants.data_models.chat_messages import OpasMessage, OpasUserMessage
 from openassistants.functions.base import BaseFunction, Entity
 from openassistants.llm_function_calling.utils import generate_to_json
@@ -110,7 +109,7 @@ async def generate_argument_decisions(
         HumanMessage(
             content=f"""
 {_build_chat_history_prompt(chat_history)}
-            
+
 We are analyzing the following function:
 {await function.get_signature()}
 
@@ -160,8 +159,8 @@ async def generate_arguments(
     final_messages = [
         HumanMessage(
             content=f"""
-{_build_chat_history_prompt(chat_history)}            
-            
+{_build_chat_history_prompt(chat_history)}
+
 We want to invoke the following function:
 {await function.get_signature()}
 

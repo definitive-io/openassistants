@@ -4,12 +4,11 @@ import textwrap
 from typing import Dict, List, Optional, Sequence
 
 from langchain.chat_models.base import BaseChatModel
-from pydantic import BaseModel
-
 from openassistants.data_models.chat_messages import OpasMessage
 from openassistants.data_models.function_output import FunctionOutput
 from openassistants.functions.utils import AsyncStreamVersion
 from openassistants.utils.json_schema import PyRepr
+from pydantic import BaseModel
 
 
 @dataclasses.dataclass

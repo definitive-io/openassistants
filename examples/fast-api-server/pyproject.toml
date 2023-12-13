@@ -7,25 +7,20 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
-definitive-openassistants = {path = "../../packages/openassistants", extras = ["duckdb"], develop = true}
-definitive-openassistants-fastapi = {path = "../../packages/openassistants-fastapi", develop = true}
+definitive-openassistants = { path = "../../packages/openassistants", extras = ["duckdb"], develop = true }
+definitive-openassistants-fastapi = { path = "../../packages/openassistants-fastapi", develop = true }
 fastapi = "^0.104.1"
 uvicorn = "^0.24.0.post1"
 watchfiles = "^0.21.0"
 
 
 [tool.poetry.group.test.dependencies]
-black = "^23.11.0"
 coverage = "^7.3.2"
-flake8 = "^6.1.0"
 invoke = "^2.2.0"
 mypy = "^1.7.1"
 pytest = "^7.4.3"
 pytest-asyncio = "^0.23.2"
-isort = "^5.12.0"
-
-[tool.isort]
-profile = "black"
+ruff = "^0.1.7"
 
 [build-system]
 requires = ["poetry-core"]

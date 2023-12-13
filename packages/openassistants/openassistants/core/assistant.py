@@ -5,7 +5,6 @@ from langchain.chat_models.base import BaseChatModel
 from langchain.chat_models.openai import ChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.embeddings.base import Embeddings
-
 from openassistants.data_models.chat_messages import (
     OpasAssistantMessage,
     OpasFunctionMessage,
@@ -72,6 +71,13 @@ class Assistant:
                 functions.extend(await library.aread_all())
             self._cached_all_functions = functions
         return self._cached_all_functions
+
+    async def get_function_by_id(self, function_id: str) -> Optional[BaseFunction]:
+        functions = await self.get_all_functions()
+        for function in functions:
+            if function.id == function_id:
+                return function
+        return None
 
     async def execute_function(
         self,

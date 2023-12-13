@@ -1,12 +1,9 @@
 import abc
 import dataclasses
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 from pydantic import create_model
 from pydantic.fields import FieldInfo
-
-from openassistants.data_models.chat_messages import OpasAssistantMessage, OpasMessage
-from openassistants.data_models.function_input import FunctionCall
 
 
 class Validation(abc.ABC):
@@ -50,14 +47,3 @@ def json_schema(schema: Dict[str, Validation], required: List[str]):
         },
         "required": required,
     }
-
-
-def extract_assistant_autofill_function(
-    message: OpasMessage,
-) -> Optional[FunctionCall]:
-    if isinstance(message, OpasAssistantMessage):
-        if message.function_call is not None:
-            return message.function_call
-        if message.input_request is not None:
-            return message.input_request
-    return None

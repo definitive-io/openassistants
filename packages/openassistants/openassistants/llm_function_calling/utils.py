@@ -5,7 +5,6 @@ import numpy as np
 from langchain.chat_models.base import BaseChatModel
 from langchain.chat_models.openai import ChatOpenAI
 from langchain.schema.messages import BaseMessage, SystemMessage
-
 from openassistants.data_models.chat_messages import ensure_alternating
 from openassistants.utils.langchain_util import openai_function_call_enabled
 

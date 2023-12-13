@@ -24,24 +24,17 @@ def refresh(ctx):
 
 
 @task
-def isort(ctx):
-    print("Sorting imports with isort")
-    with ctx.cd(PROJECT_DIR):
-        ctx.run("poetry run isort .", pty=True)
-
-
-@task
 def format(ctx):
-    print("Formatting with black")
+    print("Checking style with ruff")
     with ctx.cd(PROJECT_DIR):
-        ctx.run("poetry run black --exclude .venv .", pty=True)
+        ctx.run("poetry run ruff fmt", pty=True)
 
 
 @task
 def lint(ctx):
-    print("Linting with flake8")
+    print("Linting with ruff")
     with ctx.cd(PROJECT_DIR):
-        ctx.run("poetry run flake8 .", pty=True)
+        ctx.run("poetry run ruff check --fix", pty=True)
 
 
 @task
@@ -67,6 +60,6 @@ def coverage(ctx):
         )
 
 
-@task(pre=[isort, format, lint, typing, test, coverage])
+@task(pre=[format, lint, typing, test, coverage])
 def check(_):
     pass

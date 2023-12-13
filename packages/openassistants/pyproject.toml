@@ -4,7 +4,7 @@ version = "0.0.1"
 description = ""
 authors = ["Rick Lamers <ricklamers@gmail.com>"]
 readme = "README.md"
-packages = [{include = "openassistants"}]
+packages = [{ include = "openassistants" }, { include = "openassistants/py.typed" }]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.12"
@@ -20,10 +20,9 @@ duckduckgo-search = "^3.9.11"
 usearch = "^2.8.14"
 tiktoken = "^0.5.2"
 ruamel-yaml = "^0.18.5"
+tabulate = "^0.9.0"
 
 [tool.poetry.group.test.dependencies]
-black = "^23.11.0"
-flake8 = "^6.1.0"
 invoke = "^2.2.0"
 mypy = "^1.7.1"
 pandas-stubs = "^2.1.1.230928"
@@ -31,11 +30,8 @@ pytest = "^7.4.3"
 pytest-asyncio = "^0.23.2"
 types-jsonschema = "^4.20.0.0"
 coverage = "^7.3.2"
-isort = "^5.12.0"
 types-pyyaml = "^6.0.12.12"
-
-[tool.isort]
-profile = "black"
+ruff = "^0.1.7"
 
 [build-system]
 requires = ["poetry-core"]

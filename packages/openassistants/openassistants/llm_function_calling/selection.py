@@ -1,16 +1,14 @@
 import asyncio
-import json
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 from langchain.chat_models.base import BaseChatModel
-from langchain.schema.messages import HumanMessage, SystemMessage
-from pydantic import BaseModel
-
+from langchain.schema.messages import HumanMessage
 from openassistants.functions.base import BaseFunction
 from openassistants.llm_function_calling.utils import (
     chunk_list_by_max_size,
     generate_to_json,
 )
+from pydantic import BaseModel
 
 
 async def filter_functions(

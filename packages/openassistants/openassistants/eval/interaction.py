@@ -1,14 +1,7 @@
 import abc
 import asyncio
-import logging
 import textwrap
-import traceback
-from typing import Annotated, Any, Callable, Dict, List, Literal, Optional, Tuple, Union
-
-import jsonschema
-from langchain.chains.openai_functions.base import convert_pydantic_to_openai_function
-from langchain.chat_models import ChatOpenAI
-from pydantic import BaseModel, Field
+from typing import Any, Dict, List, Literal, Tuple
 
 from openassistants.core.assistant import Assistant
 from openassistants.data_models.chat_messages import (
@@ -19,322 +12,233 @@ from openassistants.data_models.chat_messages import (
 )
 from openassistants.data_models.function_input import FunctionCall
 from openassistants.data_models.function_output import DataFrameOutput, TextOutput
-from openassistants.eval.base import extract_assistant_autofill_function
+from openassistants.functions.base import BaseFunction
 from openassistants.utils.async_utils import last_value
-
-logger = logging.getLogger(__name__)
-
-
-class GradeSummary(BaseModel):
-    """Grade a summary against a data table."""
-
-    analysis: Annotated[
-        str,
-        Field(description="grading analysis of the summary"),
-    ]
-    pass_fail: Annotated[
-        Literal["pass", "fail"],
-        Field(description="does the summary pass or fail"),
-    ]
-
-    @staticmethod
-    def _remove_key_recursive(d: Any, target_key: str):
-        if isinstance(d, dict):
-            d.pop(target_key, "")
-            for key in d:
-                d[key] = GradeSummary._remove_key_recursive(d[key], target_key)
-        return d
-
-    @classmethod
-    def to_openai_function(cls) -> dict:
-        schema = convert_pydantic_to_openai_function(cls)  # type: ignore
-        if "description" in schema["parameters"]:
-            schema["parameters"].pop("description")
-        GradeSummary._remove_key_recursive(schema, "title")
-        return schema  # type: ignore
+from pydantic import BaseModel, ConfigDict
 
 
-InteractionTypes = Annotated[
-    Union["SentinelInteraction", "FunctionInteraction"],
-    Field(json_schema_extra={"discriminator": "type"}),
-]
+class InteractionCheckError(Exception):
+    def __init__(self, failure_type: str, comment: str):
+        super().__init__(f"[{failure_type}] {comment}")
+        self.failure_type = failure_type
+        self.comment = comment
 
 
-class BaseInteraction(abc.ABC, BaseModel):
-    type: str
-    message: str
-    children: List[InteractionTypes] = []
-
+class BaseResponseChecker(abc.ABC):
     @abc.abstractmethod
-    async def run(
-        self, chat_history: List[OpasMessage], assistant: Assistant
-    ) -> "InteractionReport":
+    async def check(self, response: "FunctionInteractionResponse") -> None:
+        """
+        Check the response
+        :raises InteractionCheckError: if the check fails
+        """
         pass
 
 
-class InteractionReport(BaseModel):
-    interaction: InteractionTypes
-    failures: List[str]
-    children: List["InteractionReport"]
-    function_response: Optional[OpasFunctionMessage] = None
-    summary_grading: Optional[GradeSummary] = None
-
-    @staticmethod
-    def cascade_failure(interaction: InteractionTypes, failure: str):
-        return InteractionReport(
-            interaction=interaction,
-            failures=[failure],
-            children=[
-                InteractionReport.cascade_failure(c, "cascading failure from parent")
-                for c in interaction.children
-            ],
-        )
-
-    def pretty_repr(self) -> str:
-        this_status = f"{self.interaction.message} - {self.failures}"
-        child_status = "\n".join([child.pretty_repr() for child in self.children])
-        child_status = textwrap.indent(child_status, "> ")
-
-        return this_status + "\n" + child_status
-
-    def count_condition(
-        self,
-        condition: Callable[["InteractionReport"], bool],
-        ignore_node: Callable[["InteractionReport"], bool] = lambda x: False,
-    ) -> Tuple[int, int]:
-        ignored = ignore_node(self)
-        total = 1 if not ignored else 0
-        pos = 1 if (not ignored) and condition(self) else 0
-        for child in self.children:
-            child_pos, child_total = child.count_condition(condition)
-            pos += child_pos
-            total += child_total
-        return pos, total
-
-
-class SentinelInteraction(BaseInteraction):
-    type: Literal["sentinel"] = "sentinel"
-    message: str = "sentinel"
-
-    async def run(
-        self, chat_history: List[OpasMessage], assistant: Assistant
-    ) -> "InteractionReport":
-        children_result: List[InteractionReport] = await asyncio.gather(
-            *[c.run(chat_history, assistant) for c in self.children]
-        )
-
-        return InteractionReport(
-            interaction=self,
-            failures=[],
-            children=children_result,
-        )
-
-
-class FunctionInteraction(BaseInteraction):
+class FunctionInteractionNode(BaseModel):
     type: Literal["function"] = "function"
+    message: str
+    library: str
     function: str
     arg_schema: dict = {"type": "object"}
     sample_args: Dict[str, Any] = {}
     summarization_assertions: List[str] = []
 
-    async def validate_function_call(
+
+class FunctionInteraction(FunctionInteractionNode):
+    children: List["FunctionInteraction"] = []
+
+    async def run_function_selection(
         self,
-        response_messages: List[OpasMessage],
-        interaction_report: InteractionReport,
-    ):
-        function_call = extract_assistant_autofill_function(response_messages[0])
+        assistant: Assistant,
+        history_with_user_message: List[OpasMessage],
+    ) -> OpasAssistantMessage:
+        response_messages = await last_value(
+            assistant.run_chat(history_with_user_message, False)
+        )
+        assistant_selection = response_messages[0]
+        assert isinstance(assistant_selection, OpasAssistantMessage)
+        return assistant_selection
 
-        if function_call is None:
-            interaction_report.failures.append(
-                f"Could not extract function call from response {response_messages[0]}"
-            )
-
-        elif function_call.name != self.function:
-            interaction_report.failures.append(
-                f"Expected function {self.function} but got {function_call.name}"
-            )
-
-        else:
-            try:
-                jsonschema.validate(function_call.arguments, self.arg_schema)
-            except jsonschema.ValidationError as e:
-                interaction_report.failures.append(
-                    f"Function call arguments did not match schema: {str(e)}"
-                )
-
-    async def validate_function_response(
+    async def run_function_infilling(
         self,
-        response_messages: List[OpasMessage],
-        interaction_report: InteractionReport,
+        assistant: Assistant,
+        history_with_user_message: List[OpasMessage],
+    ) -> OpasAssistantMessage:
+        response_messages = await last_value(
+            assistant.run_chat(history_with_user_message, False)
+        )
+        assistant_infilling = response_messages[0]
+        assert isinstance(assistant_infilling, OpasAssistantMessage)
+        return assistant_infilling
+
+    async def run_function_invocation(
+        self,
+        assistant: Assistant,
+        history_with_user_message_input_response: List[OpasMessage],
     ):
-        assistant_function_call, function_response = response_messages
-
-        if not isinstance(assistant_function_call, OpasAssistantMessage):
-            interaction_report.failures.append(
-                f"Expected OpasAssistantMessage but got "
-                f"{type(assistant_function_call)} as first response message"
-            )
-            return
-
-        if assistant_function_call.function_call is None:
-            interaction_report.failures.append(
-                "Expected OpasAssistantMessage to have function_call but got None"
-            )
-            return
-
-        function_name = assistant_function_call.function_call.name
-        function_args = assistant_function_call.function_call.arguments
-
-        if not isinstance(function_response, OpasFunctionMessage):
-            interaction_report.failures.append(
-                f"Expected OpasFunctionMessage but got "
-                f"{type(function_response)} as last response message"
-            )
-            return
-
-        if function_response.name != self.function:
-            interaction_report.failures.append(
-                f"Expected function {self.function} but got "
-                f"{function_response.name}"
-            )
-            return
-
-        df = None
-        summary_text = None
-
-        for o in function_response.outputs:
-            if isinstance(o, DataFrameOutput):
-                df = o.dataframe.to_pd()
-
-            if isinstance(o, TextOutput):
-                summary_text = o.text
-
-        if df is None:
-            return (
-                [
-                    f"Could not find DataFrameOutput in function response "
-                    f"{function_response}"
-                ],
-                None,
-                function_response,
-            )
-
-        if summary_text is None:
-            return (
-                [f"Could not find TextOutput in function response {function_response}"],
-                None,
-                function_response,
-            )
-
-        llm = ChatOpenAI(model="gpt-4-0613", temperature=0.0)
-
-        df_csv = df.to_csv(index=False, date_format="iso")
-        func = f"{function_name}({function_args}"
-        prompt = f"""\
-Based on the following data table that was retrieved from calling the function {func})
-```
-{df_csv}
-```
-
-a junior analyst wrote the summary:
-```
-{summary_text}
-```
-
-Please grade the analysts summary.
-
-Split the analysis in 2 sections:
-- inaccuracies on facts that can be derived from the data table
-- other inaccuracies
-
-Finally provide a pass / fail:
-- only take into account 'inaccuracies on the data table facts'
-"""
-
-        grading_functions = [GradeSummary.to_openai_function()]
-        llm_result = llm.invoke(
-            input=prompt,
-            functions=grading_functions,
-            function_call={"name": GradeSummary.__name__},
+        response_messages = await last_value(
+            assistant.run_chat(history_with_user_message_input_response, True)
         )
+        assistant_function_invocation = response_messages[0]
+        function_response = response_messages[1]
+        assert isinstance(assistant_function_invocation, OpasAssistantMessage)
+        assert isinstance(function_response, OpasFunctionMessage)
+        return assistant_function_invocation, function_response
 
-        raw_arg = llm_result.additional_kwargs.get("function_call", {}).get(
-            "arguments", {}
-        )
-
-        grade: GradeSummary = GradeSummary.model_validate_json(raw_arg)
-
-        interaction_report.summary_grading = grade
-        interaction_report.function_response = function_response
-
-        if grade.pass_fail == "fail":
-            interaction_report.failures.append("Summary failed grading")
+    async def get_function(
+        self,
+        assistant: Assistant,
+    ) -> BaseFunction:
+        base_function = await assistant.get_function_by_id(self.function)
+        if base_function is None:
+            raise ValueError("Function not found")
+        return base_function
 
     async def run(
-        self, chat_history: List[OpasMessage], assistant: Assistant
-    ) -> InteractionReport:
-        try:
-            report = InteractionReport(interaction=self, failures=[], children=[])
+        self,
+        assistant: Assistant,
+        ancestor_response: List["FunctionInteractionResponse"],
+    ) -> "FunctionInteractionResponse":
+        history: List[OpasMessage] = [
+            m  # type: ignore
+            for interaction_response in ancestor_response
+            for m in interaction_response.as_chat_history()
+        ]
 
-            failures: List[str] = []
+        user_message = OpasUserMessage(content=self.message)
 
-            user_message = OpasUserMessage(content=self.message)
+        user_input_response = OpasUserMessage(
+            content="",
+            input_response=FunctionCall(
+                name=self.function,
+                arguments=self.sample_args,
+            ),
+        )
 
-            response_messages: List[OpasMessage] = await last_value(
-                assistant.run_chat(chat_history + [user_message], True)
-            )
+        (
+            assistant_selection,
+            # assistant_infilling,
+            (assistant_function_invocation, function_response),
+            function_spec,
+        ) = await asyncio.gather(
+            self.run_function_selection(assistant, history + [user_message]),
+            # self.run_function_infilling(client, history + [user_message]),
+            self.run_function_invocation(
+                assistant, history + [user_message, user_input_response]
+            ),
+            self.get_function(assistant),
+        )
 
-            # check assistant message
-            await self.validate_function_call(response_messages, report)
+        interaction_response = FunctionInteractionResponse(
+            interaction=self,
+            user_message=user_message,
+            assistant_selection=assistant_selection,
+            assistant_infilling=assistant_selection,
+            user_input_response=user_input_response,
+            assistant_function_invocation=assistant_function_invocation,
+            function_response=function_response,
+            function_spec=function_spec,
+            children=[],
+        )
 
-            # continue with function call
-            user_function_call = OpasUserMessage(
-                content="",
-                input_response=FunctionCall(
-                    name=self.function,
-                    arguments=self.sample_args,
-                ),
-            )
-
-            function_response_messages: List[OpasMessage] = await last_value(
-                assistant.run_chat(
-                    chat_history
-                    + [user_message]
-                    + response_messages
-                    + [user_function_call],
-                )
-            )
-
-            await self.validate_function_response(function_response_messages, report)
-
-            failures.extend(failures)
-
-            child_coroutines = [
-                child.run(
-                    chat_history
-                    + [user_message]
-                    + response_messages
-                    + [user_function_call]
-                    + function_response_messages,
-                    assistant,
-                )
-                for child in self.children
+        interaction_response.children = await asyncio.gather(
+            *[
+                c.run(assistant, ancestor_response + [interaction_response])
+                for c in self.children
             ]
+        )
 
-            child_results: List[InteractionReport] = await asyncio.gather(
-                *child_coroutines
-            )  # type: ignore
+        return interaction_response
 
-            report.children.extend(child_results)
 
-            return report
+class FunctionInteractionResponseNode(BaseModel):
+    interaction: "FunctionInteractionNode"
+    user_message: OpasUserMessage
+    assistant_selection: OpasAssistantMessage
+    assistant_infilling: OpasAssistantMessage
+    user_input_response: OpasUserMessage
+    assistant_function_invocation: OpasAssistantMessage
+    function_response: OpasFunctionMessage
+    function_spec: BaseFunction
 
-        except Exception as e:
-            traceback.print_exc()
-            logger.exception(
-                f"Exception while running function interaction: {self.message}"
-            )
-            return InteractionReport.cascade_failure(
-                interaction=self,
-                failure=f"Exception: {str(e)}",
-            )
+
+class FunctionInteractionResponse(FunctionInteractionResponseNode):
+    children: List["FunctionInteractionResponse"] = []
+
+    def as_chat_history(
+        self,
+    ) -> Tuple[
+        OpasUserMessage,
+        OpasAssistantMessage,
+        OpasUserMessage,
+        OpasAssistantMessage,
+        OpasFunctionMessage,
+    ]:
+        return (
+            self.user_message,
+            self.assistant_infilling,
+            self.user_input_response,
+            self.assistant_function_invocation,
+            self.function_response,
+        )
+
+    async def run_checks(
+        self,
+        response_checkers: List["BaseResponseChecker"],
+    ) -> "InteractionReport":
+        tasks = []
+
+        for checker in response_checkers:
+            task = asyncio.create_task(checker.check(self))
+            tasks.append(task)
+
+        errors: List[Exception] = []
+
+        for t in tasks:
+            try:
+                await t
+            except InteractionCheckError as e:
+                errors.append(e)
+
+        report = InteractionReport(
+            interaction_response=self,
+            failures=errors,
+        )
+
+        report.children = await asyncio.gather(
+            *[c.run_checks(response_checkers) for c in self.children]
+        )
+
+        return report
+
+
+class InteractionReport(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    interaction_response: "FunctionInteractionResponseNode"
+    failures: List[Exception] = []
+    children: List["InteractionReport"] = []
+
+    def pretty_repr(self, include_summary=True, include_dataframe=True) -> str:
+        failures = "\n".join([str(e) for e in self.failures])
+
+        if len(self.failures) == 0:
+            failures = "PASSED"
+
+        response_txt = ""
+        for o in self.interaction_response.function_response.outputs:
+            if include_dataframe and isinstance(o, DataFrameOutput):
+                response_txt += f"[DataFrame]\n{o.dataframe.to_pd().to_markdown()}\n"
+            if include_summary and isinstance(o, TextOutput):
+                response_txt += f"[Text]\n{o.text}\n"
+
+        this_status = f"""
+"{self.interaction_response.interaction.message}"
+{response_txt.strip()}
+{failures}
+"""
+
+        child_status = "\n".join([child.pretty_repr() for child in self.children])
+        child_status = textwrap.indent(child_status, "|   ")
+
+        return this_status + child_status

@@ -1,18 +1,12 @@
 import asyncio
-from typing import Annotated, Any, Dict, List, Literal, Sequence, Union
+from typing import Annotated, Any, List, Literal, Sequence
 
 import pandas as pd
 from langchain.schema import AIMessage, BaseMessage, HumanMessage, SystemMessage
-from pydantic import Field, PrivateAttr
-from sqlalchemy import text
-from sqlalchemy.engine import Engine
-from starlette.concurrency import run_in_threadpool
-
 from openassistants.data_models.chat_messages import (
     OpasAssistantMessage,
     OpasFunctionMessage,
     OpasMessage,
-    merge_content,
 )
 from openassistants.data_models.function_input import BaseJSONSchema, FunctionCall
 from openassistants.data_models.function_output import (
@@ -31,6 +25,10 @@ from openassistants.utils.async_utils import AsyncStreamVersion
 from openassistants.utils.history_representation import opas_to_interactions
 from openassistants.utils.langchain_util import string_from_message
 from openassistants.utils.strings import resolve_str_template
+from pydantic import Field, PrivateAttr
+from sqlalchemy import text
+from sqlalchemy.engine import Engine
+from starlette.concurrency import run_in_threadpool
 
 
 def run_sql(sqlalchemy_engine: Engine, sql: str, parameters: dict) -> pd.DataFrame:
@@ -59,7 +57,7 @@ def _opas_to_summarization_lc(
             ),
         )
         lc_messages.append(HumanMessage(content=user_serialized_yaml))
-        # we are trying to predict summarization, so in the few shots, the summarization is the assistants AIMessage
+        # we are trying to predict summarization, so in the few shots, the summarization is the assistants AIMessage  # noqa: E501
         if interaction.function_output_summary is not None:
             lc_messages.append(AIMessage(content=interaction.function_output_summary))
 
