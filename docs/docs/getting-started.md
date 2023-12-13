@@ -69,7 +69,16 @@ python_code: |
 
 Once the functions have been defined we can connect to the REST API using the default UI client.
 
-Simply start the Next.js app that points to the REST endpoint:
+First, navigate to `examples/fast-api-server` to start the example backend:
+
+```bash
+poetry install
+poetry shell
+export OPENAI_API_KEY=sk-my-key
+./run/sh
+```
+
+Then, simply start the Next.js app that points to the REST endpoint:
 
 ```bash
 cd examples/next
