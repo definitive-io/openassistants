@@ -1,25 +1,10 @@
 from typing import Annotated, List, Literal, Optional
 
-import pandas as pd
-from langchain.schema.messages import (
-    AIMessage,
-    BaseMessage,
-    HumanMessage,
-    merge_content,
-)
+from langchain.schema.messages import BaseMessage, merge_content
 from pydantic import BaseModel, Field
 
 from openassistants.data_models.function_input import FunctionCall, FunctionInputRequest
-from openassistants.data_models.function_output import (
-    DataFrameOutput,
-    FunctionOutput,
-    TextOutput,
-)
-
-
-class SuggestedPrompt(BaseModel):
-    title: str
-    prompt: str
+from openassistants.data_models.function_output import FunctionOutput
 
 
 class OpasUserMessage(BaseModel):

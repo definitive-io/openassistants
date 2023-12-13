@@ -29,6 +29,7 @@ from openassistants.functions.visualize import execute_visualization
 from openassistants.utils import yaml
 from openassistants.utils.async_utils import AsyncStreamVersion
 from openassistants.utils.history_representation import opas_to_interactions
+from openassistants.utils.langchain_util import string_from_message
 from openassistants.utils.strings import resolve_str_template
 
 
@@ -138,13 +139,13 @@ You will:
             ),
         )
 
-        full: Union[str, List[Union[str, Dict]]] = ""
+        full: str = ""
 
         async for response_message in deps.summarization_chat_model.astream(
             lc_messages,
             {"tags": ["summarization"]},
         ):
-            full = merge_content(full, response_message.content)
+            full += string_from_message(response_message)
             yield full
 
     async def execute(
