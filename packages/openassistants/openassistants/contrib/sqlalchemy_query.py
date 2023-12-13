@@ -7,13 +7,13 @@ from openassistants.data_models.chat_messages import (
     OpasAssistantMessage,
     OpasFunctionMessage,
     OpasMessage,
-    SuggestedPrompt,
 )
 from openassistants.data_models.function_input import BaseJSONSchema, FunctionCall
 from openassistants.data_models.function_output import (
     DataFrameOutput,
     FollowUpsOutput,
     FunctionOutput,
+    SuggestedPrompt,
     TextOutput,
     VisualizationOutput,
 )
@@ -23,6 +23,7 @@ from openassistants.functions.visualize import execute_visualization
 from openassistants.utils import yaml
 from openassistants.utils.async_utils import AsyncStreamVersion
 from openassistants.utils.history_representation import opas_to_interactions
+from openassistants.utils.langchain_util import string_from_message
 from openassistants.utils.strings import resolve_str_template
 from pydantic import Field, PrivateAttr
 from sqlalchemy import text
@@ -34,10 +35,9 @@ def run_sql(sqlalchemy_engine: Engine, sql: str, parameters: dict) -> pd.DataFra
     with sqlalchemy_engine.connect() as connection:
         # Use SQLAlchemy's text function to create a SQL expression
         # Bind parameters to the SQL expression to prevent SQL injection
-        sql = text(sql)
-        result = connection.execute(sql, parameters)
+        result = connection.execute(text(sql), parameters)
         df = pd.DataFrame(result.fetchall())
-        df.columns = result.keys()
+        df.columns = pd.Index([str(key) for key in result.keys()])
     return df
 
 
@@ -137,13 +137,13 @@ You will:
             ),
         )
 
-        full = ""
+        full: str = ""
 
         async for response_message in deps.summarization_chat_model.astream(
             lc_messages,
             {"tags": ["summarization"]},
         ):
-            full += response_message.content
+            full += string_from_message(response_message)
             yield full
 
     async def execute(

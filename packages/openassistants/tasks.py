@@ -6,7 +6,7 @@ PROJECT_DIR = str(pathlib.Path(__file__).parents[0])
 
 
 @task
-def refresh_poetry(ctx):
+def refresh(ctx):
     with ctx.cd(PROJECT_DIR):
         ctx.run("rm -r .venv poetry.lock")
         ctx.run("poetry install --with test", pty=True)

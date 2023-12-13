@@ -8,7 +8,7 @@ from sqlalchemy import Engine, create_engine
 
 
 class DuckDBQueryFunction(QueryFunction):
-    type: Literal["DuckDBQueryFunction"] = "DuckDBQueryFunction"  # type ignore
+    type: Literal["DuckDBQueryFunction"] = "DuckDBQueryFunction"  # type: ignore
     dataset: str
 
     def __init__(self, *args, **kwargs):

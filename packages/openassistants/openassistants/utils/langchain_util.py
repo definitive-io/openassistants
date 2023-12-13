@@ -5,6 +5,7 @@ from langchain.chat_models.openai import ChatOpenAI
 from langchain.embeddings import CacheBackedEmbeddings
 from langchain.schema import BaseStore
 from langchain.schema.embeddings import Embeddings
+from langchain.schema.messages import BaseMessage
 from langchain.storage import LocalFileStore
 from langchain_core.language_models import BaseChatModel
 
@@ -20,6 +21,13 @@ def openai_function_call_enabled(chat: BaseChatModel):
         "gpt-3.5-turbo-1106",
         "gpt-3.5-turbo-0613",
     }
+
+
+def string_from_message(message: BaseMessage) -> str:
+    if isinstance(message.content, str):
+        return message.content
+    else:
+        raise ValueError(f"Unknown message type {type(message)}")
 
 
 class LangChainCachedEmbeddings(Embeddings):

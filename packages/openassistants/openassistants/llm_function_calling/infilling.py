@@ -101,7 +101,7 @@ async def generate_argument_decisions(
     function: BaseFunction,
     chat: BaseChatModel,
     user_query: str,
-    chat_history: List[OpasUserMessage],
+    chat_history: List[OpasMessage],
 ) -> ArgumentDecisionDict:
     json_schema = await generate_argument_decisions_schema(function)
 
@@ -144,7 +144,7 @@ async def generate_arguments(
     function: BaseFunction,
     chat: BaseChatModel,
     user_query: str,
-    chat_history: List[OpasUserMessage],
+    chat_history: List[OpasMessage],
     entities_info: Dict[str, List[Entity]],
 ) -> dict:
     json_schema = deepcopy(await function.get_parameters_json_schema())

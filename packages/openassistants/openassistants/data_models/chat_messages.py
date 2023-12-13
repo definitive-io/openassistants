@@ -6,11 +6,6 @@ from openassistants.data_models.function_output import FunctionOutput
 from pydantic import BaseModel, Field
 
 
-class SuggestedPrompt(BaseModel):
-    title: str
-    prompt: str
-
-
 class OpasUserMessage(BaseModel):
     role: Literal["user"] = "user"
     content: str
