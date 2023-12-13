@@ -215,12 +215,6 @@ class Assistant:
             else:
                 # In case no function was found and no suggested functions were found
                 # attempt to directly perform the request requested by the user.
-                fb_function_call_invocation = OpasAssistantMessage(
-                    content="",
-                    function_call=FunctionCall(name="fallback-function", arguments={}),
-                )
-                yield [fb_function_call_invocation]
-
                 async for output in perform_general_qa(
                     chat=self.function_fallback,
                     chat_history=dependencies.get("chat_history"),
@@ -228,10 +222,7 @@ class Assistant:
                     scope_description=self.scope_description,
                 ):
                     yield [
-                        fb_function_call_invocation,
-                        OpasFunctionMessage(
-                            name="fallback-function", outputs=list(output)
-                        ),
+                        OpasAssistantMessage(content=output),
                     ]
 
                 return

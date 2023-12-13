@@ -1,11 +1,8 @@
-from typing import List, Sequence
+from typing import List
 
 from langchain.chat_models.base import BaseChatModel
 from langchain.schema.messages import HumanMessage, SystemMessage
 from openassistants.data_models.chat_messages import OpasMessage
-from openassistants.data_models.function_output import (
-    TextOutput,
-)
 from openassistants.functions.utils import AsyncStreamVersion
 from openassistants.llm_function_calling.utils import build_chat_history_prompt
 from openassistants.utils.langchain_util import string_from_message
@@ -16,7 +13,7 @@ async def perform_general_qa(
     user_query: str,
     chat_history: List[OpasMessage],
     scope_description: str,
-) -> AsyncStreamVersion[Sequence[TextOutput]]:
+) -> AsyncStreamVersion[str]:
     final_messages = [
         SystemMessage(content="You are a helpful assistant."),
         HumanMessage(
@@ -40,4 +37,4 @@ SCOPE DESCRIPTION END
         {"tags": ["fallback"]},
     ):
         full += string_from_message(response_message)
-        yield [TextOutput(text=full)]
+        yield full
