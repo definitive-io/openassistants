@@ -1,11 +1,17 @@
 import json
-from typing import Optional
+from typing import List, Optional
 
 import numpy as np
 from langchain.chat_models.base import BaseChatModel
 from langchain.chat_models.openai import ChatOpenAI
 from langchain.schema.messages import BaseMessage, SystemMessage
-from openassistants.data_models.chat_messages import ensure_alternating
+from openassistants.data_models.chat_messages import (
+    OpasMessage,
+    OpasUserMessage,
+    ensure_alternating,
+)
+from openassistants.utils import yaml
+from openassistants.utils.history_representation import opas_to_interactions
 from openassistants.utils.langchain_util import openai_function_call_enabled
 
 OUTPUT_FORMAT_INSTRUCTION = """\
@@ -15,6 +21,55 @@ Your responses MUST be formatted as a valid JSON instance that conforms to the J
 
 {schema}
 """  # noqa: E501
+
+
+def build_chat_history_prompt(chat_history: List[OpasMessage]) -> str:
+    """
+    Build a string that looks like
+
+    CHAT HISTORY
+    ---
+    user_prompt: ...
+    function_name: ...
+    function_arguments: ...
+    function_output_data: ...
+    ---
+    user: ...
+    ---
+    END OF CHAT HISTORY
+    """
+
+    previous_history, last_message = chat_history[:-1], chat_history[-1]
+
+    assert isinstance(last_message, OpasUserMessage)
+
+    interactions = opas_to_interactions(previous_history)
+
+    interactions_dicts = [
+        interaction.model_dump(
+            mode="json",
+            include={
+                "user_prompt",
+                "assistant_response",
+                "function_name",
+                "function_arguments",
+                "function_output_data",
+                "function_output_summary",
+            },
+            exclude_none=True,
+        )
+        for interaction in interactions
+    ] + [{"user_prompt": last_message.content.strip()}]
+
+    message_yaml_str = yaml.dumps_all(interactions_dicts)
+
+    return f"""\
+CHAT HISTORY
+---
+{message_yaml_str.strip()}
+---
+END OF CHAT HISTORY
+"""
 
 
 def chunk_list_by_max_size(lst, max_size):
