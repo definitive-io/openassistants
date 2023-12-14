@@ -82,4 +82,4 @@ python_code: |
 As you can see, the `python_code` and `parameters` YAML properties are passed into the class constructor to make sure the provided code in the YAML
 can be used by the function's implementation.
 
-We're working on the ability to resolve to custom Python class names, right now we're only importing all the functions defined in `openassistants.contrib`.
+Check out the [example app](https://github.com/definitive-io/openassistants/blob/main/examples/fast-api-server/fast_api_server/main.py) to see how you can add custom functions to the assistant library.
