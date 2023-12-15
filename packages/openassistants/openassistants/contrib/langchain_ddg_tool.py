@@ -1,10 +1,39 @@
-from typing import Literal, Sequence
+import os
+from typing import Dict, List, Literal, Optional, Sequence
 
-from langchain.tools.ddg_search.tool import DuckDuckGoSearchAPIWrapper
 from openassistants.data_models.function_input import BaseJSONSchema
 from openassistants.data_models.function_output import FunctionOutput, TextOutput
 from openassistants.functions.base import BaseFunction, FunctionExecutionDependency
 from openassistants.functions.utils import AsyncStreamVersion
+
+
+def ddgs_text(query: str, max_results: Optional[int] = None) -> List[Dict[str, str]]:
+    """Run query through DuckDuckGo text search and return results."""
+    from duckduckgo_search import DDGS
+
+    proxies = {}
+    DDG_HTTP_PROXY = os.getenv("DDG_HTTP_PROXY")
+    DDG_HTTPS_PROXY = os.getenv("DDG_HTTPS_PROXY")
+
+    if DDG_HTTP_PROXY and DDG_HTTPS_PROXY:
+        proxies = {"http": DDG_HTTP_PROXY, "https": DDG_HTTPS_PROXY}
+
+    # Set environment variable for httpx SSL_CERT_FILE to DDG_SSL_CERT_FILE
+    DDG_SSL_CERT_FILE = os.getenv("DDG_SSL_CERT_FILE")
+    if DDG_SSL_CERT_FILE:
+        os.environ["SSL_CERT_FILE"] = DDG_SSL_CERT_FILE
+    original_ssl_cert_file = os.environ.get("SSL_CERT_FILE")
+    with DDGS(proxies=proxies) as ddgs:
+        ddgs_gen = ddgs.text(
+            query,
+            max_results=max_results,
+        )
+        results = [r for r in ddgs_gen] if ddgs_gen else []
+    if original_ssl_cert_file is not None:
+        os.environ["SSL_CERT_FILE"] = original_ssl_cert_file
+    else:
+        os.environ.pop("SSL_CERT_FILE", None)
+    return results
 
 
 class DuckDuckGoToolFunction(BaseFunction):
@@ -17,11 +46,10 @@ class DuckDuckGoToolFunction(BaseFunction):
         try:
             if "query" in deps.arguments:
                 query = deps.arguments["query"]
-                search = DuckDuckGoSearchAPIWrapper()
 
-                results = search.results(query, max_results=4, source="text")
+                results = ddgs_text(query, max_results=4)
                 formatted_results = "\n\n".join(
-                    f"**{result['title']}**  \n_{result['snippet']}_"
+                    f"**{result['title']}**  \n_{result['body']}_"
                     for index, result in enumerate(results)
                 )
                 yield [
