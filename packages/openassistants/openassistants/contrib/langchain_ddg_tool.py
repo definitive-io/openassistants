@@ -16,7 +16,7 @@ def ddgs_text(query: str, max_results: Optional[int] = None) -> List[Dict[str, s
     DDG_HTTPS_PROXY = os.getenv("DDG_HTTPS_PROXY")
 
     if DDG_HTTP_PROXY and DDG_HTTPS_PROXY:
-        proxies = {"http": DDG_HTTP_PROXY, "https": DDG_HTTPS_PROXY}
+        proxies = {"http://": DDG_HTTP_PROXY, "https://": DDG_HTTPS_PROXY}
 
     # Set environment variable for httpx SSL_CERT_FILE to DDG_SSL_CERT_FILE
     DDG_SSL_CERT_FILE = os.getenv("DDG_SSL_CERT_FILE")
