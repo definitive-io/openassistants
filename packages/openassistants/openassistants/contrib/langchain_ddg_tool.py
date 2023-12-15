@@ -1,6 +1,6 @@
 from typing import Literal, Sequence
 
-from langchain.tools.ddg_search import DuckDuckGoSearchRun
+from langchain.tools.ddg_search.tool import DuckDuckGoSearchAPIWrapper
 from openassistants.data_models.function_input import BaseJSONSchema
 from openassistants.data_models.function_output import FunctionOutput, TextOutput
 from openassistants.functions.base import BaseFunction, FunctionExecutionDependency
@@ -17,9 +17,17 @@ class DuckDuckGoToolFunction(BaseFunction):
         try:
             if "query" in deps.arguments:
                 query = deps.arguments["query"]
-                search = DuckDuckGoSearchRun()
+                search = DuckDuckGoSearchAPIWrapper()
+
+                results = search.results(query, max_results=4, source="text")
+                formatted_results = "\n\n".join(
+                    f"**{result['title']}**  \n_{result['snippet']}_"
+                    for index, result in enumerate(results)
+                )
                 yield [
-                    TextOutput(text=f"Found this on DuckDuckGo: {search.run(query)}")
+                    TextOutput(
+                        text=f"Found this on DuckDuckGo: \n\n{formatted_results}"
+                    )
                 ]
             else:
                 raise ValueError(

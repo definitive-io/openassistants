@@ -1,0 +1,15 @@
+display_name: Search the web using DuckDuckGo
+description: |
+  get information from DuckDuckGo
+sample_questions:
+  - Search the web for "pied piper"
+parameters:
+  json_schema:
+    type: object
+    properties:
+      query:
+        type: string
+        description: search query to send to DuckDuckGo
+    required:
+      - query
+type: DuckDuckGoToolFunction
