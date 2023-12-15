@@ -7,9 +7,7 @@ from openassistants.functions.base import BaseFunction, FunctionExecutionDepende
 from openassistants.functions.utils import AsyncStreamVersion
 
 
-def ddgs_text(
-    self, query: str, max_results: Optional[int] = None
-) -> List[Dict[str, str]]:
+def ddgs_text(query: str, max_results: Optional[int] = None) -> List[Dict[str, str]]:
     """Run query through DuckDuckGo text search and return results."""
     from duckduckgo_search import DDGS
 
@@ -28,11 +26,7 @@ def ddgs_text(
     with DDGS(proxies=proxies) as ddgs:
         ddgs_gen = ddgs.text(
             query,
-            region=self.region,
-            safesearch=self.safesearch,
-            timelimit=self.time,
-            max_results=max_results or self.max_results,
-            backend=self.backend,
+            max_results=max_results,
         )
         results = [r for r in ddgs_gen] if ddgs_gen else []
     if original_ssl_cert_file is not None:
@@ -55,7 +49,7 @@ class DuckDuckGoToolFunction(BaseFunction):
 
                 results = ddgs_text(query, max_results=4)
                 formatted_results = "\n\n".join(
-                    f"**{result['title']}**  \n_{result['snippet']}_"
+                    f"**{result['title']}**  \n_{result['body']}_"
                     for index, result in enumerate(results)
                 )
                 yield [
