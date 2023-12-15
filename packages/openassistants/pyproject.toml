@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "definitive-openassistants"
-version = "0.0.3"
+version = "0.0.4"
 description = ""
 authors = ["Rick Lamers <ricklamers@gmail.com>"]
 readme = "README.md"
