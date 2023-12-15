@@ -1,0 +1,77 @@
+name: Publish to PyPI and NPM if version changes
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install poetry
+
+    - name: Check version for openassistants
+      id: check_version_openassistants
+      run: |
+        cd packages/openassistants
+        CURRENT_VERSION=$(poetry version -s)
+        PYPI_VERSION=$(curl -s https://pypi.org/pypi/definitive-openassistants/json | jq -r .info.version)
+        if [ "$CURRENT_VERSION" != "$PYPI_VERSION" ]; then
+          echo "::set-output name=version_changed::true"
+        else
+          echo "::set-output name=version_changed::false"
+        fi
+
+    - name: Check version for openassistants-fastapi
+      id: check_version_openassistants_fastapi
+      run: |
+        cd packages/openassistants-fastapi
+        CURRENT_VERSION=$(poetry version -s)
+        PYPI_VERSION=$(curl -s https://pypi.org/pypi/definitive-openassistants-fastapi/json | jq -r .info.version)
+        if [ "$CURRENT_VERSION" != "$PYPI_VERSION" ]; then
+          echo "::set-output name=version_changed::true"
+        else
+          echo "::set-output name=version_changed::false"
+        fi
+
+    - name: Check version for openassistants-ui
+      id: check_version_openassistants_ui
+      run: |
+        cd packages/openassistants-ui
+        CURRENT_VERSION=$(npm view @definitive-io/openassistants-ui version)
+        NPM_VERSION=$(curl -s https://registry.npmjs.org/@definitive-io/openassistants-ui | jq '.["dist-tags"].latest')
+        if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then
+          echo "::set-output name=version_changed::true"
+        else
+          echo "::set-output name=version_changed::false"
+        fi
+
+    - name: Publish openassistants to PyPI
+      if: steps.check_version_openassistants.outputs.version_changed == 'true'
+      run: make publish-openassistants
+      env:
+        POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+
+    - name: Publish openassistants-fastapi to PyPI
+      if: steps.check_version_openassistants_fastapi.outputs.version_changed == 'true'
+      run: make publish-openassistants-fastapi
+      env:
+        POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+
+    - name: Publish openassistants-ui to NPM
+      if: steps.check_version_openassistants_ui.outputs.version_changed == 'true'
+      run: make publish-openassistants-ui
+      env:
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
