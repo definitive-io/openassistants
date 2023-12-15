@@ -52,6 +52,12 @@ class PythonEvalFunction(BaseFunction):
         return self.parameters.json_schema
 ```
 
+Note the following:
+
+- As an extension of `BaseFunction`, your new function should take in parameters `BaseJSONSchema`, even if those parameters are empty. Thus, defining `get_parameters_json_schema` as in the last two lines above is required for your function to load
+- Your class must have an `execute` function which runs asyncronously, which means it must be prepended with `async` where results are `yielded`, not `returned`
+- `AsyncStreamVersion[Sequence[FunctionOutput]]`: this means that the `execute` function yields a list of `FunctionOutput` type. `FunctionOutput` is a generic type that encompasses `TextOutput`, `DataFrameOutput`, `VisualizationOutput` and `FollowUpsOutput`. Since it's a sequence, you can return more than one type in the same query response (i.e. return a table via `DataFrameOutput` and then a visualization of the data via `VisualizationOutput` in the same chat response). Note the output of function `main` in the yaml definition below for proper formatting
+
 Is used in a YAML function definition as follows:
 ```yaml
 name: send_purchase_inquiry_email
