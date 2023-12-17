@@ -44,12 +44,11 @@ class BaseFunction(BaseModel, abc.ABC):
         """
         yield []
 
-    @abc.abstractmethod
     async def get_parameters_json_schema(self) -> dict:
         """
         Get the json schema of the function's parameters
         """
-        pass
+        return {"type": "object", "properties": {}, "required": []}
 
     async def get_signature(self) -> str:
         json_schema = await self.get_parameters_json_schema()

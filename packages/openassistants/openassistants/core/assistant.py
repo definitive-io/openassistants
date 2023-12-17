@@ -5,6 +5,7 @@ from langchain.chat_models.base import BaseChatModel
 from langchain.chat_models.openai import ChatOpenAI
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.embeddings.base import Embeddings
+from openassistants.contrib.index_function import IndexFunction
 from openassistants.data_models.chat_messages import (
     OpasAssistantMessage,
     OpasFunctionMessage,
@@ -17,7 +18,7 @@ from openassistants.functions.base import (
     Entity,
     FunctionExecutionDependency,
 )
-from openassistants.functions.crud import FunctionCRUD, LocalCRUD
+from openassistants.functions.crud import FunctionCRUD, LocalCRUD, PythonCRUD
 from openassistants.llm_function_calling.entity_resolution import resolve_entities
 from openassistants.llm_function_calling.fallback import perform_general_qa
 from openassistants.llm_function_calling.infilling import (
@@ -49,6 +50,7 @@ class Assistant:
         function_fallback: Optional[BaseChatModel] = None,
         entity_embedding_model: Optional[Embeddings] = None,
         scope_description: str = "General assistant.",
+        add_index: bool = True,
     ):
         # instantiate dynamically vs as default args
         self.function_identification = function_identification or ChatOpenAI(
@@ -72,6 +74,29 @@ class Assistant:
             library if isinstance(library, FunctionCRUD) else LocalCRUD(library)
             for library in libraries
         ]
+
+        if add_index:
+            self.function_libraries.append(
+                PythonCRUD(
+                    functions=[
+                        IndexFunction(
+                            id="index",
+                            display_name="List functions",
+                            description=(
+                                "List the functions available to the assistant. "
+                                "This is a list of things you can ask."
+                            ),
+                            sample_questions=[
+                                "What can you do?",
+                                "What can I ask?",
+                                "Which functions are defined?",
+                            ],
+                            functions=self.get_all_functions,
+                        )
+                    ]
+                )
+            )
+
         self._cached_all_functions = []
 
     async def get_all_functions(self) -> List[BaseFunction]:

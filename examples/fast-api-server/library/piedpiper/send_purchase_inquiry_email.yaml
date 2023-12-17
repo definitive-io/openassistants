@@ -1,6 +1,6 @@
 display_name: Send purchase inquiry email
 description: |
-  send an inquiry email about a recent purchase to an employee
+  Send an inquiry email about a recent purchase to an employee
 sample_questions:
   - send purchase inquiry email
 parameters:
