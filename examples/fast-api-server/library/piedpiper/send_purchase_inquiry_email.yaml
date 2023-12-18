@@ -3,6 +3,7 @@ description: |
   Send an inquiry email about a recent purchase to an employee
 sample_questions:
   - send purchase inquiry email
+confirm: true
 parameters:
   json_schema:
     type: object

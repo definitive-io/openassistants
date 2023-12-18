@@ -276,7 +276,9 @@ class Assistant:
         else:
             complete, arguments = True, {}
 
-        can_autorun = autorun  # and selected_function.can_autoru
+        can_autorun = autorun
+        if selected_function.confirm:
+            can_autorun = False
 
         if can_autorun and complete:
             # execute

@@ -33,6 +33,7 @@ class BaseFunction(BaseModel, abc.ABC):
     display_name: Optional[str]
     description: str
     sample_questions: List[str]
+    confirm: bool = False
 
     @abc.abstractmethod
     async def execute(
