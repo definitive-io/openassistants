@@ -19,6 +19,9 @@
       }
     ],
     "paths": {
+      "@definitive-io/openassistants-ui/*": [
+        "../packages/openassistants-ui/src/*"
+      ],
       "@/*": ["./src/*"]
     }
   },
