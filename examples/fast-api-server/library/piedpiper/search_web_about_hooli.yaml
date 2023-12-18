@@ -1,6 +1,6 @@
 display_name: Search the web using DuckDuckGo
 description: |
-  get information from DuckDuckGo
+  Get information from DuckDuckGo
 sample_questions:
   - Search the web for "pied piper"
 parameters:
