@@ -12,3 +12,13 @@ publish-openassistants-fastapi:
 publish-openassistants-ui:
 	@echo "Publishing openassistants-ui to npm..."
 	@cd packages/openassistants-ui && npm publish
+
+refresh-poetry:
+	@echo "Refreshing Poetry environment..."
+	@cd examples/fast-api-server && poetry install
+
+run:
+	@echo "Running services in background..."
+	@(cd examples/fast-api-server && poetry run ./run.sh) &
+	@(cd examples/next && yarn dev) &
+	@while :; do sleep 1; done
