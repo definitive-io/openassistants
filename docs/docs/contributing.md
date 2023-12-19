@@ -142,8 +142,3 @@ Welcome to the openassistants contributing page. Please follow the guidelines be
 - **Write Clear Descriptions**: Clearly describe the purpose of your changes and how they impact the project.
 - **Include Tests**: Add tests that validate your changes, if applicable.
 - **Be Patient and Responsive**: Be patient for reviews and responsive to feedback and questions.
-
-
-## Additional contribution info
-
-We welcome all contributions. Please check out [CONTRIBUTING.md](https://github.com/definitive-io/openassistants/blob/main/CONTRIBUTING.md) for more details.
