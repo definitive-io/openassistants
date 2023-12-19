@@ -4,7 +4,6 @@ from typing import Annotated, List, Optional
 from fastapi import APIRouter, HTTPException
 from openassistants.core.assistant import Assistant
 from openassistants.data_models.chat_messages import OpasMessage
-from openassistants.functions.base import BaseFunction
 from openassistants.utils.async_utils import last_value
 from pydantic import BaseModel, Field
 
@@ -53,30 +52,32 @@ def create_router(route_assistants: RouteAssistants) -> APIRouter:
         else:
             return await last_value(stream())
 
-    @v1alpha_router.get("/libraries/{assistant_id}/functions")
-    async def get_assistant_functions(
-        assistant_id: str,
-    ) -> List[BaseFunction]:
-        if assistant_id not in route_assistants.assistants:
-            raise HTTPException(status_code=404, detail="assistant not found")
-
-        return await route_assistants.assistants[assistant_id].get_all_functions()
-
-    @v1alpha_router.get("/libraries/{assistant_id}/functions/{function_id}")
-    async def get_function_from_assistant(
-        assistant_id: str,
-        function_id: str,
-    ) -> BaseFunction:
-        if assistant_id not in route_assistants.assistants:
-            raise HTTPException(status_code=404, detail="assistant not found")
-        function_libraries = route_assistants.assistants[
-            assistant_id
-        ].function_libraries
-
-        for library in function_libraries:
-            if (func := await library.aread(function_id)) is not None:
-                return func
-
-        raise HTTPException(status_code=404, detail="function not found")
-
+    # TODO: we need a way to specify IBaseFunctions that can be serialized
+    # commented out for now since its not being used anyways
+    # @v1alpha_router.get("/libraries/{assistant_id}/functions")
+    # async def get_assistant_functions(
+    #     assistant_id: str,
+    # ) -> List[IBaseFunction]:
+    #     if assistant_id not in route_assistants.assistants:
+    #         raise HTTPException(status_code=404, detail="assistant not found")
+    #
+    #     return await route_assistants.assistants[assistant_id].get_all_functions()
+    #
+    # @v1alpha_router.get("/libraries/{assistant_id}/functions/{function_id}")
+    # async def get_function_from_assistant(
+    #     assistant_id: str,
+    #     function_id: str,
+    # ) -> IBaseFunction:
+    #     if assistant_id not in route_assistants.assistants:
+    #         raise HTTPException(status_code=404, detail="assistant not found")
+    #     function_libraries = route_assistants.assistants[
+    #         assistant_id
+    #     ].function_libraries
+    #
+    #     for library in function_libraries:
+    #         if (func := await library.aread(function_id)) is not None:
+    #             return func
+    #
+    #     raise HTTPException(status_code=404, detail="function not found")
+    #
     return v1alpha_router

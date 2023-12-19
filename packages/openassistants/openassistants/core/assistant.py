@@ -14,9 +14,9 @@ from openassistants.data_models.chat_messages import (
 )
 from openassistants.data_models.function_input import FunctionCall, FunctionInputRequest
 from openassistants.functions.base import (
-    BaseFunction,
-    Entity,
     FunctionExecutionDependency,
+    IBaseFunction,
+    IEntity,
 )
 from openassistants.functions.crud import FunctionCRUD, LocalCRUD, PythonCRUD
 from openassistants.llm_function_calling.entity_resolution import resolve_entities
@@ -39,7 +39,7 @@ class Assistant:
     function_libraries: List[FunctionCRUD]
     scope_description: str
 
-    _cached_all_functions: List[BaseFunction]
+    _cached_all_functions: List[IBaseFunction]
 
     def __init__(
         self,
@@ -76,30 +76,26 @@ class Assistant:
         ]
 
         if add_index:
-            self.function_libraries.append(
-                PythonCRUD(
-                    functions=[
-                        IndexFunction(
-                            id="index",
-                            display_name="List functions",
-                            description=(
-                                "List the functions available to the assistant. "
-                                "This is a list of things you can ask."
-                            ),
-                            sample_questions=[
-                                "What can you do?",
-                                "What can I ask?",
-                                "Which functions are defined?",
-                            ],
-                            functions=self.get_all_functions,
-                        )
-                    ]
-                )
+            index_func: IBaseFunction = IndexFunction(
+                id="index",
+                display_name="List functions",
+                description=(
+                    "List the functions available to the assistant. "
+                    "This is a list of things you can ask."
+                ),
+                sample_questions=[
+                    "What can you do?",
+                    "What can I ask?",
+                    "Which functions are defined?",
+                ],
+                functions=self.get_all_functions,
             )
+
+            self.function_libraries.append(PythonCRUD(functions=[index_func]))
 
         self._cached_all_functions = []
 
-    async def get_all_functions(self) -> List[BaseFunction]:
+    async def get_all_functions(self) -> List[IBaseFunction]:
         if not self._cached_all_functions:
             functions = []
             for library in self.function_libraries:
@@ -107,16 +103,16 @@ class Assistant:
             self._cached_all_functions = functions
         return self._cached_all_functions
 
-    async def get_function_by_id(self, function_id: str) -> Optional[BaseFunction]:
+    async def get_function_by_id(self, function_id: str) -> Optional[IBaseFunction]:
         functions = await self.get_all_functions()
         for function in functions:
-            if function.id == function_id:
+            if function.get_id() == function_id:
                 return function
         return None
 
     async def execute_function(
         self,
-        function: BaseFunction,
+        function: IBaseFunction,
         func_args: Dict[str, Any],
         dependencies: Dict[str, Any],
     ):
@@ -127,7 +123,7 @@ class Assistant:
 
         function_call_invocation = OpasAssistantMessage(
             content="",
-            function_call=FunctionCall(name=function.id, arguments=func_args),
+            function_call=FunctionCall(name=function.get_id(), arguments=func_args),
         )
 
         yield [function_call_invocation]
@@ -135,16 +131,16 @@ class Assistant:
         async for version in function.execute(deps):
             yield [
                 function_call_invocation,
-                OpasFunctionMessage(name=function.id, outputs=list(version)),
+                OpasFunctionMessage(name=function.get_id(), outputs=list(version)),
             ]
 
     async def do_infilling(
         self,
         dependencies: dict,
         message: OpasUserMessage,
-        selected_function: BaseFunction,
+        selected_function: IBaseFunction,
         args_json_schema: dict,
-        entities_info: Dict[str, List[Entity]],
+        entities_info: Dict[str, List[IEntity]],
     ) -> Tuple[bool, dict]:
         # Perform infilling and generate argument decisions in parallel
         chat_history: List[OpasMessage] = dependencies.get("chat_history")  # type: ignore
@@ -198,18 +194,18 @@ class Assistant:
     async def handle_user_plaintext(
         self,
         message: OpasUserMessage,
-        all_functions: List[BaseFunction],
+        all_functions: List[IBaseFunction],
         dependencies: Dict[str, Any],
         autorun: bool,
         force_select_function: Optional[str],
     ) -> AsyncStreamVersion[List[OpasMessage]]:
-        selected_function: Optional[BaseFunction] = None
+        selected_function: Optional[IBaseFunction] = None
         # perform entity resolution
         chat_history: List[OpasMessage] = dependencies.get("chat_history")  # type: ignore
 
         # Perform function selection
         if force_select_function is not None:
-            filtered = [f for f in all_functions if f.id == force_select_function]
+            filtered = [f for f in all_functions if f.get_id() == force_select_function]
             if len(filtered) == 0:
                 raise ValueError("function not found")
             selected_function = filtered[0]
@@ -223,10 +219,7 @@ class Assistant:
                 selected_function = function_selection.function
             elif function_selection.suggested_functions:
                 suggested_functions_names = ", ".join(
-                    [
-                        f.get_function_name()
-                        for f in function_selection.suggested_functions
-                    ]
+                    [f.get_id() for f in function_selection.suggested_functions]
                 )
                 yield [
                     OpasAssistantMessage(
@@ -242,7 +235,7 @@ class Assistant:
                 # attempt to directly perform the request requested by the user.
                 async for output in perform_general_qa(
                     chat=self.function_fallback,
-                    chat_history=dependencies.get("chat_history"),
+                    chat_history=dependencies.get("chat_history"),  # type: ignore
                     user_query=message.content,
                     scope_description=self.scope_description,
                 ):
@@ -253,7 +246,7 @@ class Assistant:
                 return
 
         selected_function_arg_json_schema = (
-            await selected_function.get_parameters_json_schema()
+            selected_function.get_parameters_json_schema()
         )
 
         entities_info = await resolve_entities(
@@ -277,7 +270,7 @@ class Assistant:
             complete, arguments = True, {}
 
         can_autorun = autorun
-        if selected_function.confirm:
+        if selected_function.get_confirm():
             can_autorun = False
 
         if can_autorun and complete:
@@ -291,11 +284,11 @@ class Assistant:
             # request input
             request_user_input = OpasAssistantMessage(
                 content=f"""\
-    I found the function *{selected_function.display_name or selected_function.id}*.
+    I found the function *{selected_function.get_display_name() or selected_function.get_id()}*.
     Please fill in the following parameters and I'll run it.
-    """,
+    """,  # noqa: E501
                 input_request=FunctionInputRequest(
-                    name=selected_function.id,
+                    name=selected_function.get_id(),
                     json_schema=selected_function_arg_json_schema,
                     arguments=arguments,
                 ),
@@ -306,16 +299,16 @@ class Assistant:
     async def handle_user_input(
         self,
         message: OpasUserMessage,
-        all_functions: List[BaseFunction],
+        all_functions: List[IBaseFunction],
         dependencies: Dict[str, Any],
     ) -> AsyncStreamVersion[List[OpasMessage]]:
         if message.input_response is None:
             raise ValueError("message must have input_response")
 
-        selected_function: Optional[BaseFunction] = None
+        selected_function: Optional[IBaseFunction] = None
 
         for f in all_functions:
-            if f.id == message.input_response.name:
+            if f.get_id() == message.input_response.name:
                 selected_function = f
 
         if selected_function is None:

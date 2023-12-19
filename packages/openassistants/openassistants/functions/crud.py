@@ -7,7 +7,7 @@ from openassistants.contrib.duckdb_query import DuckDBQueryFunction
 from openassistants.contrib.langchain_ddg_tool import DuckDuckGoToolFunction
 from openassistants.contrib.python_eval import PythonEvalFunction
 from openassistants.contrib.sqlalchemy_query import QueryFunction
-from openassistants.functions.base import BaseFunction
+from openassistants.functions.base import BaseFunction, IBaseFunction
 from openassistants.utils import yaml
 from pydantic import Field, TypeAdapter
 from starlette.concurrency import run_in_threadpool
@@ -20,20 +20,20 @@ AllFunctionTypes = Annotated[
 
 class FunctionCRUD(abc.ABC):
     @abc.abstractmethod
-    def read(self, slug: str) -> Optional[BaseFunction]:
+    def read(self, slug: str) -> Optional[IBaseFunction]:
         pass
 
     @abc.abstractmethod
     def list_ids(self) -> List[str]:
         pass
 
-    async def aread(self, function_id: str) -> Optional[BaseFunction]:
+    async def aread(self, function_id: str) -> Optional[IBaseFunction]:
         return await run_in_threadpool(self.read, function_id)
 
     async def alist_ids(self) -> List[str]:
         return await run_in_threadpool(self.list_ids)
 
-    async def aread_all(self) -> List[BaseFunction]:
+    async def aread_all(self) -> List[IBaseFunction]:
         ids = await self.alist_ids()
         return await asyncio.gather(*[self.aread(f_id) for f_id in ids])  # type: ignore
 
@@ -69,15 +69,15 @@ class LocalCRUD(FunctionCRUD):
 
 
 class PythonCRUD(FunctionCRUD):
-    def __init__(self, functions: List[BaseFunction]):
+    def __init__(self, functions: List[IBaseFunction]):
         self.functions = functions
 
-    def read(self, slug: str) -> Optional[BaseFunction]:
+    def read(self, slug: str) -> Optional[IBaseFunction]:
         for function in self.functions:
-            if function.id == slug:
+            if function.get_id() == slug:
                 return function
 
         return None
 
     def list_ids(self) -> List[str]:
-        return [function.id for function in self.functions]
+        return [function.get_id() for function in self.functions]
