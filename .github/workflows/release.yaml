@@ -49,16 +49,17 @@ jobs:
         fi
 
     - name: Check version for openassistants-react
-      id: check_version_openassistants_ui
+      id: check_version_openassistants_react
       run: |
-        echo "CHECK_VERSION_OPENASSISTANTS_UI=" >> $GITHUB_ENV
+        echo "CHECK_VERSION_OPENASSISTANTS_REACT=" >> $GITHUB_ENV
         cd packages/openassistants-react
         CURRENT_VERSION=$(npm view @definitive-io/openassistants-react version)
         NPM_VERSION=$(curl -s https://registry.npmjs.org/@definitive-io/openassistants-react | jq '.["dist-tags"].latest')
         if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then
-          echo "CHECK_VERSION_OPENASSISTANTS_UI=true" >> $GITHUB_ENV
+          npm install
+          echo "CHECK_VERSION_OPENASSISTANTS_REACT=true" >> $GITHUB_ENV
         else
-          echo "CHECK_VERSION_OPENASSISTANTS_UI=false" >> $GITHUB_ENV
+          echo "CHECK_VERSION_OPENASSISTANTS_REACT=false" >> $GITHUB_ENV
         fi
 
     - name: Publish openassistants to PyPI
@@ -74,7 +75,7 @@ jobs:
         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
 
     - name: Publish openassistants-react to NPM
-      if: env.CHECK_VERSION_OPENASSISTANTS_UI == 'true'
+      if: env.CHECK_VERSION_OPENASSISTANTS_REACT == 'true'
       run: |
         echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
         make publish-openassistants-react
