@@ -26,7 +26,7 @@ export default function Home() {
                 prompt: 'What can I ask?',
               },
             ]}
-            welcomeMessage="This is a simple starter for deploying a nextjs app with an open assistant chat widget. This is configured to use the example library which builds off a couple csv of employee and purchase data"
+            welcomeMessage="This is a simple starter for deploying a nextjs app with an open assistant chat widget. This is configured to use the example library which builds off a couple csvs of employee and purchase data"
             getToken={() => Promise.resolve('token')}
           ></OpenAssistantsChat>
         </div>

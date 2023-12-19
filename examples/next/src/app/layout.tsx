@@ -11,7 +11,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <Providers defaultTheme="light" disableTransitionOnChange>
+        <Providers
+          defaultTheme="light"
+          enableColorScheme
+          disableTransitionOnChange
+        >
           <main className="flex h-full flex-col flex-1 bg-white">
             {children}
           </main>
