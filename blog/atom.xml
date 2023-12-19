@@ -40,7 +40,7 @@
 <ul>
 <li><code>openassistants</code> the core library responsible for the main function calling / message generating runtime</li>
 <li><code>openassistants-fastapi</code> a set of FastAPI routes used for interacting with the core runtime loop through a REST API</li>
-<li><code>openassistants-ui</code> an example chat client that supports rich streaming outputs like tables, plots, form inputs and text.</li>
+<li><code>openassistants-react</code> an example chat client that supports rich streaming outputs like tables, plots, form inputs and text.</li>
 </ul>
 <p>The project is built on top of LangChain and we will soon support more sophisticated RAG features based on LlamaIndex. Our goal is to be the open alternative to the AssistantsAPI that can operate against any LLM: both Open Source LLMs like fine-tuned Llama's focused on function calling and proprietary models with e.g. native support for function calling.</p>
 <p><img loading="lazy" src="https://github.com/definitive-io/openassistants/assets/1309307/3e7821f4-62d8-42c0-80c7-94be8b3f2e2c" alt="" class="img_ev3q"></p>
