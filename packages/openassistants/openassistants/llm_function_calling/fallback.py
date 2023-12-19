@@ -22,7 +22,7 @@ async def perform_general_qa(
 
 Try to answer the user's question based on the chat history: {user_query}.
 
-If the user question is considered outside of the scope of the assistant, respond with "I'm sorry, I can't help you with that. Do you have any other questions?"
+If the user question is considered outside of the scope of the assistant, respond with "I'm sorry, I can't help you with that. Do you have any other questions pertaining to our dealership or inventory?"
 
 SCOPE DESCRIPTION START
 {scope_description}

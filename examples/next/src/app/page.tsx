@@ -11,7 +11,7 @@ export default function Home() {
             api={`${
               process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
             }/v1alpha/assistants/hooli/chat`}
-            name="Example Assistant"
+            name="Chevrolet of Watsonville Chat Team"
             starterPrompts={[
               {
                 title: 'Display store hours',
@@ -26,7 +26,7 @@ export default function Home() {
                 prompt: 'Contact us',
               },
             ]}
-            welcomeMessage="This is a simple starter for deploying a nextjs app with an open assistant chat widget. This is configured to use the example library which builds off a couple csv of employee and purchase data"
+            welcomeMessage="Good afternoon! Welcome to Chevrolet of Watsonville. How can I assist you today in your vehicle search?"
             getToken={() => Promise.resolve('token')}
           ></OpenAssistantsChat>
         </div>
