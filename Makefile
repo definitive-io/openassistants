@@ -1,4 +1,4 @@
-publish: publish-openassistants publish-openassistants-fastapi publish-openassistants-ui
+publish: publish-openassistants publish-openassistants-fastapi publish-openassistants-react
 	@echo "All packages published!"
 
 publish-openassistants:
@@ -9,9 +9,9 @@ publish-openassistants-fastapi:
 	@echo "Publishing openassistants-fastapi to PyPI..."
 	@cd packages/openassistants-fastapi && poetry publish --build
 
-publish-openassistants-ui:
-	@echo "Publishing openassistants-ui to npm..."
-	@cd packages/openassistants-ui && npm publish
+publish-openassistants-react:
+	@echo "Publishing openassistants-react to npm..."
+	@cd packages/openassistants-react && npm publish
 
 refresh-poetry:
 	@echo "Refreshing Poetry environment..."
