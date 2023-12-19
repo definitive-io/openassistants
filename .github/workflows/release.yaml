@@ -48,13 +48,13 @@ jobs:
           echo "CHECK_VERSION_OPENASSISTANTS_FASTAPI=false" >> $GITHUB_ENV
         fi
 
-    - name: Check version for openassistants-ui
+    - name: Check version for openassistants-react
       id: check_version_openassistants_ui
       run: |
         echo "CHECK_VERSION_OPENASSISTANTS_UI=" >> $GITHUB_ENV
-        cd packages/openassistants-ui
-        CURRENT_VERSION=$(npm view @definitive-io/openassistants-ui version)
-        NPM_VERSION=$(curl -s https://registry.npmjs.org/@definitive-io/openassistants-ui | jq '.["dist-tags"].latest')
+        cd packages/openassistants-react
+        CURRENT_VERSION=$(npm view @definitive-io/openassistants-react version)
+        NPM_VERSION=$(curl -s https://registry.npmjs.org/@definitive-io/openassistants-react | jq '.["dist-tags"].latest')
         if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then
           echo "CHECK_VERSION_OPENASSISTANTS_UI=true" >> $GITHUB_ENV
         else
@@ -73,10 +73,10 @@ jobs:
       env:
         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
 
-    - name: Publish openassistants-ui to NPM
+    - name: Publish openassistants-react to NPM
       if: env.CHECK_VERSION_OPENASSISTANTS_UI == 'true'
       run: |
         echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
-        make publish-openassistants-ui
+        make publish-openassistants-react
       env:
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
