@@ -10,6 +10,7 @@
     "node": ">18.0.0"
   },
   "scripts": {
+    "prepare": "yarn workspaces run prepare",
     "clean:modules": "find . -name \"node_modules\" -type d -exec rm -rf {} +",
     "clean:locks": "find . -name \"yarn.lock\" -type f -exec rm -f {} +",
     "clean:next": "find . -name \".next\" -type d -exec rm -rf {} +",
