@@ -1,0 +1,33 @@
+display_name: Show value deals
+description: |
+  Show value deals
+sample_questions:
+  - Show value deals
+parameters:
+  json_schema:
+    type: object
+    properties: {}
+    required: []
+type: DuckDBQueryFunction
+dataset: 'dummy-data/'
+visualizations: []
+sqls:
+  - |
+    SELECT year,make,model,price,condition,mileage,exterior,interior
+    FROM 'chevroletofwatsonville.csv'
+    WHERE price_type = 'Value Price'
+    ORDER BY RANDOM()
+    LIMIT 10
+
+summarization: 'Describe the value priced vehicles'
+suggested_follow_ups:
+  - title: Show new vehicles
+    prompt: Show new vehicles
+  - title: Show pre-owned vehicles
+    prompt: Show pre-owned vehicles
+  - title: Show lowest prices
+    prompt: Show lowest prices
+  - title: Show highest prices
+    prompt: Show highest prices
+  - title: Show more value deals
+    prompt: Show value deals
