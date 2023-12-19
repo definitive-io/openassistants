@@ -1,7 +1,3 @@
----
-sidebar_position: 6
----
-
 # Contributing to openassistants
 Welcome to the openassistants contributing page. Please follow the guidelines below when making contributions to the project. All effort is greatly appreciated!
 
