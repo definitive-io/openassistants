@@ -1,0 +1,14 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "pipeline": {
+    "build:openassistants-react": {
+      "dependsOn": ["^build"]
+    },
+
+    "build": {
+      "dependsOn": ["build:openassistants-react"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "type-check": {}
+  }
+}

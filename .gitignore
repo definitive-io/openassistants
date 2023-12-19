@@ -201,3 +201,6 @@ next-env.d.ts
 
 # pycharm
 .idea
+
+# turbo
+.turbo
