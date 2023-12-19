@@ -12,7 +12,7 @@ app = FastAPI()
 custom_python_lib = PythonCRUD(functions=[find_email_by_name_function])
 
 hooli_assistant = Assistant(
-    libraries=["piedpiper", custom_python_lib],
+    libraries=["piedpiper","chevy_watsonville", custom_python_lib],
     scope_description="""Only answer questions about Hooli company related matters.
 You're also allowed to answer questions that refer to anything in the current chat history.""",
 )

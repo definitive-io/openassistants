@@ -1,0 +1,39 @@
+display_name: Show inventory
+description: |
+  Show inventory
+sample_questions:
+  - Show inventory
+parameters:
+  json_schema:
+    type: object
+    properties: {}
+    required: []
+type: DuckDBQueryFunction
+dataset: 'dummy-data/'
+visualizations: []
+sqls:
+  - |
+    SELECT condition,count(*) as num_cars
+    FROM 'chevroletofwatsonville.csv'
+    GROUP BY condition
+
+  - |
+    SELECT min(price) as min_price, max(price) as max_price
+    FROM 'chevroletofwatsonville.csv'
+
+  - |
+    SELECT count(*) as num_value_deals
+    FROM 'chevroletofwatsonville.csv'
+    WHERE price_type = 'Value Price'
+summarization: 'Describe the summarization of current inventory'
+suggested_follow_ups:
+  - title: Show new vehicles
+    prompt: Show new vehicles
+  - title: Show pre-owned vehicles
+    prompt: Show pre-owned vehicles
+  - title: Show lowest prices
+    prompt: Show lowest prices
+  - title: Show highest prices
+    prompt: Show highest prices
+  - title: Show value deals
+    prompt: Show value deals

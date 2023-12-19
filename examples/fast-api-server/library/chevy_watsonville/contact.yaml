@@ -1,0 +1,21 @@
+display_name: Displays store contact info
+description: |
+  Displays store contact info
+sample_questions:
+  - Contact us
+parameters:
+  json_schema:
+    type: object
+    properties: {}
+    required: []
+type: TextResponseFunction
+text_response: |
+  Sales: (831) 536-4337 |
+  Service: (831) 740-6046
+suggested_follow_ups:
+  - title: Display store hours
+    prompt: Display store hours
+  - title: Our location
+    prompt: Our location
+  - title: Show Inventory
+    prompt: Show Inventory

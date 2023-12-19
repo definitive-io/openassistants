@@ -1,0 +1,33 @@
+display_name: Show new vehicles
+description: |
+  Show new vehicles
+sample_questions:
+  - Show new vehicles
+parameters:
+  json_schema:
+    type: object
+    properties: {}
+    required: []
+type: DuckDBQueryFunction
+dataset: 'dummy-data/'
+visualizations: []
+sqls:
+  - |
+    SELECT year,make,model,price,exterior,interior
+    FROM 'chevroletofwatsonville.csv'
+    WHERE condition = 'New' and model not like '%Work Truck%'
+    ORDER BY RANDOM()
+    LIMIT 10
+
+summarization: 'Describe the new vehicles'
+suggested_follow_ups:
+  - title: Show more new vehicles
+    prompt: Show new vehicles
+  - title: Show pre-owned vehicles
+    prompt: Show pre-owned vehicles
+  - title: Show lowest prices
+    prompt: Show lowest prices
+  - title: Show highest prices
+    prompt: Show highest prices
+  - title: Show value deals
+    prompt: Show value deals

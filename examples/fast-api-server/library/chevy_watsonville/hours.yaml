@@ -1,0 +1,19 @@
+display_name: Displays store hours
+description: |
+  Displays store hours
+sample_questions:
+  - What are our hours?
+parameters:
+  json_schema:
+    type: object
+    properties: {}
+    required: []
+type: TextResponseFunction
+text_response: 'Our hours are 9 AM-8 PM'
+suggested_follow_ups:
+  - title: Contact us
+    prompt: Contact us
+  - title: Our location
+    prompt: Our location
+  - title: Show Inventory
+    prompt: Show Inventory

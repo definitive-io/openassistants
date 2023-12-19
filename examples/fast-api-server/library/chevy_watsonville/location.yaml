@@ -1,0 +1,19 @@
+display_name: Displays store location
+description: |
+  Displays store location
+sample_questions:
+  - Contact us
+parameters:
+  json_schema:
+    type: object
+    properties: {}
+    required: []
+type: TextResponseFunction
+text_response: "We're located at 490 Auto Center Dr, Watsonville, CA 95076"
+suggested_follow_ups:
+  - title: Display store hours
+    prompt: Display store hours
+  - title: Contact us
+    prompt: Contact us
+  - title: Show Inventory
+    prompt: Show Inventory
