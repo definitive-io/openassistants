@@ -1,5 +1,5 @@
 ---
-sidebar_position: 1
+sidebar_position: 3
 ---
 
 # Query functions
@@ -16,21 +16,21 @@ display_name: Show recent purchases
 description: |
   Show a list of recent purchases (last 5)
 sample_questions:
-  - show recent purchases
+- show recent purchases
 parameters:
   json_schema:
     type: object
     properties: {}
     required: []
 type: DuckDBQueryFunction
-dataset: 'dummy-data/'
+dataset: "dummy-data/"
 sqls:
-  - |
-    SELECT purchases.id, purchases.product, employees.email
-    FROM "purchases.csv"
-    INNER JOIN "employees.csv" ON purchases.employee = employees.id
-    ORDER BY purchases.id DESC
-    LIMIT 5
+- |
+  SELECT purchases.id, purchases.product, employees.email
+  FROM "purchases.csv"
+  INNER JOIN "employees.csv" ON purchases.employee = employees.id
+  ORDER BY purchases.id DESC
+  LIMIT 5
 visualizations: []
 summarization: 'Describe these purchases'
 ```
