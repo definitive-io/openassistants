@@ -19,7 +19,7 @@ Welcome to the openassistants contributing page. Please follow the guidelines be
 ## [Bug Reports and Enhancement Requests](#bug-reports-and-enhancement-requests)
 
 - **Search Existing Issues**: Before submitting a bug report, ensure it has not already been reported by searching existing issues.
-- **Create New Issue**: If no issues address the bug discovered, [create a new issue](#https://github.com/definitive-io/openassistants/issues/new)
+- **Create New Issue**: If no issues address the bug discovered, [create a new issue](https://github.com/definitive-io/openassistants/issues/new)
 - **Describe the Bug**: Provide a clear description of the bug, including steps to reproduce, and what the expected outcome should be.
 - **Include Details**: Specify the version of openassistants you're using, your operating system, and any relevant environment setup details.
 
@@ -34,7 +34,7 @@ Welcome to the openassistants contributing page. Please follow the guidelines be
 
 ## [Finding an Issue to Contribute to](#finding-an-issue-to-contribute-to)
 
-- **Explore the Issue Tracker**: Browse the GitHub issue tracker to find issues that interest you. Look for tags to find [issues](#https://github.com/definitive-io/openassistants/issues) you can contribute towards in your area of interest.
+- **Explore the Issue Tracker**: Browse the GitHub issue tracker to find issues that interest you. Look for tags to find [issues](https://github.com/definitive-io/openassistants/issues) you can contribute towards in your area of interest.
 - **Understand the Issue**: Before picking an issue, ensure you understand the requirements and ask for clarification if needed.
 - **Comment on the Issue**: Once you decide on an issue, comment on it, expressing your intention to work on it. This helps avoid multiple people working on the same issue.
 - **Seek Guidance**: If you're new or unsure, don't hesitate to ask maintainers or the community for help or guidance.
@@ -57,7 +57,7 @@ Welcome to the openassistants contributing page. Please follow the guidelines be
 
 - **Understand Version Control**: Familiarize yourself with the basics of version control systems, particularly Git, which is crucial for managing changes in the project.
 - **Learn Git Basics**: Gain proficiency in Git commands like `clone`, `branch`, `commit`, `push`, `pull`, and `merge`.
-- **Use GitHub Effectively**: Learn how to navigate and use GitHub for managing your work, submitting pull requests, and [collaborating](#https://docs.github.com/en/pull-requests/collaborating-with-pull-requests) with others.
+- **Use GitHub Effectively**: Learn how to navigate and use GitHub for managing your work, submitting pull requests, and [collaborating](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests) with others.
 - **Follow Best Practices**: Adopt best practices for version control like committing small changes, writing meaningful commit messages, and keeping branches focused and short-lived.
 
 
@@ -74,7 +74,7 @@ Welcome to the openassistants contributing page. Please follow the guidelines be
 ### [Creating a Fork of openassistants](#creating-a-fork-of-openasisstants)
 
 - **Navigate to the Repository**: Visit the [openassistants GitHub repository](https://github.com/definitive-io/openassistants).
-- **Fork the Repository**: Click the "Fork" button located at the top-right of the repository page. This action will create a personal copy of the repository in your own GitHub account. [Creating a fork](#https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo)
+- **Fork the Repository**: Click the "Fork" button located at the top-right of the repository page. This action will create a personal copy of the repository in your own GitHub account. [Creating a fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo)
 - **Clone Your Fork**: After forking, clone your fork to your local machine using `git clone [your-fork-url]`.
 - **Set Upstream Remote**: Configure the original 'openassistants' repository as an upstream remote using `git remote add upstream https://github.com/definitive-io/openassistants.git`.
 
