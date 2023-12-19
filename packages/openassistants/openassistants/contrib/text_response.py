@@ -1,23 +1,15 @@
-from typing import Annotated, Any, List, Literal, Sequence, Optional,Callable,Dict
-import os
-import inspect
+from typing import Annotated, List, Literal, Sequence
 import pandas as pd
 
-from openassistants.data_models.function_input import BaseJSONSchema
 from openassistants.data_models.function_output import FunctionOutput,TextOutput,SuggestedPrompt,FollowUpsOutput
 from openassistants.functions.base import BaseFunction, FunctionExecutionDependency
 from openassistants.functions.utils import AsyncStreamVersion
 from openassistants.utils.strings import resolve_str_template
 from pydantic import Field
 
-from langchain.chat_models import ChatOpenAI
-from langchain.schema.messages import HumanMessage, SystemMessage
-import base64
-
 
 class TextResponseFunction(BaseFunction):
     type: Literal["TextResponseFunction"] = "TextRespnseFunction"
-    parameters: BaseJSONSchema
     text_response: str
     suggested_follow_ups: Annotated[List[SuggestedPrompt], Field(default_factory=list)]
 
@@ -48,6 +40,3 @@ class TextResponseFunction(BaseFunction):
             ]
         )
         yield results
-    
-    async def get_parameters_json_schema(self) -> dict:
-        return self.parameters.json_schema
