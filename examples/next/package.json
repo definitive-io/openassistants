@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "prepare": "echo 'Nothing to do, skipping...'",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write \"src/**/*.{ts,tsx,json}\""
@@ -13,7 +14,7 @@
     "next": "14.0.3",
     "react": "^18",
     "react-dom": "^18",
-    "@definitive-io/openassistants-ui": "*"
+    "@definitive-io/openassistants-react": "*"
   },
   "devDependencies": {
     "@types/node": "^20",

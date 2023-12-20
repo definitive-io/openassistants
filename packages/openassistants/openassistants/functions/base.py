@@ -1,9 +1,9 @@
 import abc
 import dataclasses
 import textwrap
-from typing import Dict, List, Optional, Sequence
+from typing import List, Mapping, Optional, Sequence
 
-from langchain.chat_models.base import BaseChatModel
+from langchain_core.language_models import BaseChatModel
 from openassistants.data_models.chat_messages import OpasMessage
 from openassistants.data_models.function_output import FunctionOutput
 from openassistants.functions.utils import AsyncStreamVersion
@@ -18,22 +18,78 @@ class FunctionExecutionDependency:
     summarization_chat_model: BaseChatModel
 
 
-class Entity(BaseModel):
-    identity: str
-    description: Optional[str] = None
+class IEntity(abc.ABC):
+    @abc.abstractmethod
+    def get_identity(self) -> str:
+        pass
+
+    @abc.abstractmethod
+    def get_description(self) -> Optional[str]:
+        pass
 
 
-class EntityConfig(BaseModel):
-    entities: List[Entity]
+class IEntityConfig(abc.ABC):
+    @abc.abstractmethod
+    def get_entities(self) -> Sequence[IEntity]:
+        pass
 
 
-class BaseFunction(BaseModel, abc.ABC):
-    id: str
-    type: str
-    display_name: Optional[str]
-    description: str
-    sample_questions: List[str]
-    confirm: bool = False
+class IBaseFunction(abc.ABC):
+    @abc.abstractmethod
+    def get_id(self) -> str:
+        pass
+
+    @abc.abstractmethod
+    def get_type(self) -> str:
+        pass
+
+    @abc.abstractmethod
+    def get_display_name(self) -> Optional[str]:
+        pass
+
+    @abc.abstractmethod
+    def get_description(self) -> str:
+        pass
+
+    @abc.abstractmethod
+    def get_sample_questions(self) -> Sequence[str]:
+        pass
+
+    @abc.abstractmethod
+    def get_parameters_json_schema(self) -> dict:
+        """
+        Get the json schema of the function's parameters
+        """
+        pass
+
+    @abc.abstractmethod
+    def get_confirm(self) -> bool:
+        pass
+
+    def get_signature(self) -> str:
+        # convert JSON Schema types to Python types signature
+        params_repr = PyRepr.repr_json_schema(self.get_parameters_json_schema())
+
+        sample_question_text = "\n".join(f"* {q}" for q in self.get_sample_questions())
+
+        documentation = f"""\
+{self.get_description()}
+Example Questions:
+{sample_question_text}
+"""
+
+        # Construct the function signature
+        signature = f"""\
+def {self.get_id()}({params_repr}) -> pd.DataFrame:
+    \"\"\"
+{textwrap.indent(documentation, "    ")}
+    \"\"\"
+"""
+        return signature
+
+    @abc.abstractmethod
+    async def get_entity_configs(self) -> Mapping[str, IEntityConfig]:
+        pass
 
     @abc.abstractmethod
     async def execute(
@@ -45,37 +101,50 @@ class BaseFunction(BaseModel, abc.ABC):
         """
         yield []
 
-    async def get_parameters_json_schema(self) -> dict:
-        """
-        Get the json schema of the function's parameters
-        """
-        return {"type": "object", "properties": {}, "required": []}
 
-    async def get_signature(self) -> str:
-        json_schema = await self.get_parameters_json_schema()
+class Entity(IEntity, BaseModel):
+    identity: str
+    description: Optional[str] = None
 
-        # convert JSON Schema types to Python types signature
-        params_repr = PyRepr.repr_json_schema(json_schema)
+    def get_identity(self) -> str:
+        return self.identity
 
-        sample_question_text = "\n".join(f"* {q}" for q in self.sample_questions)
+    def get_description(self) -> Optional[str]:
+        return self.description
 
-        documentation = f"""\
-{self.description}
-Example Questions:
-{sample_question_text}
-"""
 
-        # Construct the function signature
-        signature = f"""\
-def {self.id}({params_repr}) -> pd.DataFrame:
-    \"\"\"
-{textwrap.indent(documentation, "    ")}
-    \"\"\"
-"""
-        return signature
+class EntityConfig(IEntityConfig, BaseModel):
+    entities: List[Entity]
 
-    def get_function_name(self) -> str:
-        return f"{self.id}"
+    def get_entities(self) -> Sequence[IEntity]:
+        return self.entities
 
-    async def get_entity_configs(self) -> Dict[str, EntityConfig]:
+
+class BaseFunction(IBaseFunction, BaseModel, abc.ABC):
+    id: str
+    type: str
+    display_name: Optional[str] = None
+    description: str
+    sample_questions: List[str] = []
+    confirm: bool = False
+
+    def get_id(self) -> str:
+        return self.id
+
+    def get_type(self) -> str:
+        return self.type
+
+    def get_display_name(self) -> Optional[str]:
+        return self.display_name
+
+    def get_description(self) -> str:
+        return self.description
+
+    def get_sample_questions(self) -> Sequence[str]:
+        return self.sample_questions
+
+    def get_confirm(self) -> bool:
+        return self.confirm
+
+    async def get_entity_configs(self) -> Mapping[str, IEntityConfig]:
         return {}

@@ -3,20 +3,18 @@ from typing import List, Optional
 
 from langchain.chat_models.base import BaseChatModel
 from langchain.schema.messages import HumanMessage
-from openassistants.functions.base import BaseFunction
+from openassistants.functions.base import IBaseFunction
 from openassistants.llm_function_calling.utils import (
     chunk_list_by_max_size,
     generate_to_json,
 )
-from pydantic import BaseModel
+from pydantic import BaseModel, InstanceOf
 
 
 async def filter_functions(
-    chat: BaseChatModel, functions: List[BaseFunction], user_query: str
+    chat: BaseChatModel, functions: List[IBaseFunction], user_query: str
 ) -> Optional[str]:
-    functions_text = "\n".join(
-        await asyncio.gather(*[f.get_signature() for f in functions])
-    )
+    functions_text = "\n".join([f.get_signature() for f in functions])
     json_schema = {
         "type": "object",
         "properties": {"function_name": {"type": "string"}},
@@ -46,13 +44,13 @@ Respond in JSON.
 
 
 class SelectFunctionResult(BaseModel):
-    function: Optional[BaseFunction] = None
-    suggested_functions: Optional[List[BaseFunction]] = None
+    function: Optional[InstanceOf[IBaseFunction]] = None
+    suggested_functions: Optional[List[InstanceOf[IBaseFunction]]] = None
 
 
 async def select_function(
     chat: BaseChatModel,
-    functions: List[BaseFunction],
+    functions: List[IBaseFunction],
     user_query: str,
     chunk_size: int = 4,
 ) -> SelectFunctionResult:
@@ -67,15 +65,13 @@ async def select_function(
     function_names: set[str] = set(filter(None, results))
 
     # Ensure the selected function names are in the loaded signatures
-    selected_functions = [
-        f for f in functions if f.get_function_name() in function_names
-    ]
+    selected_functions = [f for f in functions if f.get_id() in function_names]
     if not selected_functions:
         return SelectFunctionResult()
 
     # Include the signatures of all the selected functions in the final evaluation
     selected_functions_signatures = "\n".join(
-        [await f.get_signature() for f in selected_functions]
+        [f.get_signature() for f in selected_functions]
     )
 
     json_schema = {
@@ -118,12 +114,10 @@ Respond in JSON.
     suggested_function_names = json_result.get("related_function_names", [])
 
     selected_function = next(
-        (f for f in selected_functions if f.get_function_name() == function_name), None
+        (f for f in selected_functions if f.get_id() == function_name), None
     )
     suggested_functions = [
-        f
-        for f in selected_functions
-        if f.get_function_name() in suggested_function_names
+        f for f in selected_functions if f.get_id() in suggested_function_names
     ] or None
 
     return SelectFunctionResult(

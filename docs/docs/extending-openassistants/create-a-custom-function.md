@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Create a custom function
 
-You can create your own custom functions in OpenAssistants by extending the base class `BaseFunction`.
+You can create your own custom functions in OpenAssistants by extending the base interface class `IBaseFunction`.
 
 Let's take a look at the included `PythonEvalFunction` to get a sense of how this works.
 
@@ -18,7 +18,7 @@ class PythonEvalFunction(BaseFunction):
     python_code: str
 
     async def execute(
-        self, deps: FunctionExecutionDependency
+            self, deps: FunctionExecutionDependency
     ) -> AsyncStreamVersion[Sequence[FunctionOutput]]:
         # This is unsafe, make sure you trust python_code provided in the YAML
         exec_locals: Dict[str, Any] = {}
@@ -55,8 +55,14 @@ class PythonEvalFunction(BaseFunction):
 
 Note the following:
 
-- Your class must have an `execute` function which runs asyncronously, which means it must be prepended with `async` where results are `yielded`, not `returned`
-- `AsyncStreamVersion[Sequence[FunctionOutput]]`: this means that the `execute` function yields a list of `FunctionOutput` type. `FunctionOutput` is a generic type that encompasses `TextOutput`, `DataFrameOutput`, `VisualizationOutput` and `FollowUpsOutput`. Since it's a sequence, you can return more than one type in the same query response (i.e. return a table via `DataFrameOutput` and then a visualization of the data via `VisualizationOutput` in the same chat response). Note the output of function `main` in the yaml definition below for proper formatting
+- Your class must have an `execute` function which runs asyncronously, which means it must be prepended with `async`
+  where results are `yielded`, not `returned`
+- `AsyncStreamVersion[Sequence[FunctionOutput]]`: this means that the `execute` function yields a list
+  of `FunctionOutput` type. `FunctionOutput` is a generic type that
+  encompasses `TextOutput`, `DataFrameOutput`, `VisualizationOutput` and `FollowUpsOutput`. Since it's a sequence, you
+  can return more than one type in the same query response (i.e. return a table via `DataFrameOutput` and then a
+  visualization of the data via `VisualizationOutput` in the same chat response). Note the output of function `main` in
+  the yaml definition below for proper formatting
 
 Is used in a YAML function definition as follows:
 
@@ -86,7 +92,10 @@ python_code: |
     yield [{"type": "text", "text": f"Inquiry email about recent purchase sent to: {args.get('to')}"}]
 ```
 
-As you can see, the `python_code` and `parameters` YAML properties are passed into the class constructor to make sure the provided code in the YAML
+As you can see, the `python_code` and `parameters` YAML properties are passed into the class constructor to make sure
+the provided code in the YAML
 can be used by the function's implementation.
 
-Check out the [example app](https://github.com/definitive-io/openassistants/blob/main/examples/fast-api-server/fast_api_server/main.py) to see how you can add custom functions to the assistant library.
+Check out
+the [example app](https://github.com/definitive-io/openassistants/blob/main/examples/fast-api-server/fast_api_server/main.py)
+to see how you can add custom functions to the assistant library.

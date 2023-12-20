@@ -5,9 +5,12 @@ from langchain.chat_models.base import BaseChatModel
 from langchain.embeddings.base import Embeddings
 from langchain.schema import Document
 from langchain.vectorstores.usearch import USearch
-
 from openassistants.data_models.chat_messages import OpasMessage
-from openassistants.functions.base import BaseFunction, Entity, EntityConfig
+from openassistants.functions.base import (
+    IBaseFunction,
+    IEntity,
+    IEntityConfig,
+)
 from openassistants.llm_function_calling.infilling import generate_arguments
 
 
@@ -27,37 +30,46 @@ async def _vec_search(
     return results
 
 
-def entity_to_document(entity: Entity) -> Document:
-    doc = Document(metadata=entity.model_dump(), page_content=entity.identity)
+def entity_to_document(entity: IEntity) -> Document:
+    doc = Document(
+        metadata=dict(id=entity.get_identity()), page_content=entity.get_identity()
+    )
 
-    if entity.description:
-        doc.page_content += f" ({entity.description})"
+    if entity.get_description:
+        doc.page_content += f" ({entity.get_description})"
 
     return doc
 
 
 async def _get_entities(
-    entity_cfg: EntityConfig,
+    entity_cfg: IEntityConfig,
     entity_key: str,
     preliminary_arguments: Dict[str, Any],
     embeddings: Embeddings,
-) -> Tuple[str, List[Entity]]:
-    documents = [entity_to_document(entity) for entity in entity_cfg.entities]
+) -> Tuple[str, List[IEntity]]:
+    documents = [entity_to_document(entity) for entity in entity_cfg.get_entities()]
 
     query = str(preliminary_arguments[entity_key])
 
     vec_result = await _vec_search(documents, query, embeddings)
 
-    return entity_key, [Entity(**r.metadata) for r in vec_result]
+    # filter for entities that in vec result
+    ids: set[str] = set([doc.metadata["id"] for doc in vec_result])
+
+    entities = [
+        entity for entity in entity_cfg.get_entities() if entity.get_identity() in ids
+    ]
+
+    return entity_key, entities
 
 
 async def resolve_entities(
-    function: BaseFunction,
+    function: IBaseFunction,
     function_infilling_llm: BaseChatModel,
     embeddings: Embeddings,
     user_query: str,
     chat_history: List[OpasMessage],
-) -> Dict[str, List[Entity]]:
+) -> Dict[str, List[IEntity]]:
     entity_configs = await function.get_entity_configs()
 
     # skip if no entity configs

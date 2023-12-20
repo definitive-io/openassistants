@@ -35,7 +35,7 @@ We're launching with three packages:
 
 - `openassistants` the core library responsible for the main function calling / message generating runtime
 - `openassistants-fastapi` a set of FastAPI routes used for interacting with the core runtime loop through a REST API
-- `openassistants-ui` an example chat client that supports rich streaming outputs like tables, plots, form inputs and text.
+- `openassistants-react` an example chat client that supports rich streaming outputs like tables, plots, form inputs and text.
 
 The project is built on top of LangChain and we will soon support more sophisticated RAG features based on LlamaIndex. Our goal is to be the open alternative to the AssistantsAPI that can operate against any LLM: both Open Source LLMs like fine-tuned Llama's focused on function calling and proprietary models with e.g. native support for function calling.
 

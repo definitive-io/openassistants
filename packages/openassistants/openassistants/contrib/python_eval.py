@@ -3,7 +3,10 @@ from typing import Any, Callable, Dict, List, Literal, Sequence
 
 from openassistants.data_models.function_input import BaseJSONSchema
 from openassistants.data_models.function_output import FunctionOutput
-from openassistants.functions.base import BaseFunction, FunctionExecutionDependency
+from openassistants.functions.base import (
+    BaseFunction,
+    FunctionExecutionDependency,
+)
 from openassistants.functions.utils import AsyncStreamVersion
 from pydantic import TypeAdapter
 
@@ -45,5 +48,5 @@ class PythonEvalFunction(BaseFunction):
                 f"Error while executing action function {self.id}. function raised: {e}"
             ) from e
 
-    async def get_parameters_json_schema(self) -> dict:
+    def get_parameters_json_schema(self) -> dict:
         return self.parameters.json_schema
