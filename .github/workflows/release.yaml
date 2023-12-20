@@ -53,7 +53,7 @@ jobs:
       run: |
         echo "CHECK_VERSION_OPENASSISTANTS_REACT=" >> $GITHUB_ENV
         cd packages/openassistants-react
-        CURRENT_VERSION=$(npm view @definitive-io/openassistants-react version)
+        CURRENT_VERSION=$(node -p "require('./package.json').version")
         NPM_VERSION=$(curl -s https://registry.npmjs.org/@definitive-io/openassistants-react | jq '.["dist-tags"].latest')
         if [ "$CURRENT_VERSION" != "$NPM_VERSION" ]; then
           yarn install
