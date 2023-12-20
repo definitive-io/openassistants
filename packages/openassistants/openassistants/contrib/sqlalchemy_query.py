@@ -8,7 +8,10 @@ from openassistants.data_models.chat_messages import (
     OpasFunctionMessage,
     OpasMessage,
 )
-from openassistants.data_models.function_input import BaseJSONSchema, FunctionCall
+from openassistants.data_models.function_input import (
+    BaseJSONSchema,
+    FunctionCall,
+)
 from openassistants.data_models.function_output import (
     DataFrameOutput,
     FollowUpsOutput,
@@ -201,5 +204,5 @@ You will:
 
         yield results
 
-    async def get_parameters_json_schema(self) -> dict:
+    def get_parameters_json_schema(self) -> dict:
         return self.parameters.json_schema

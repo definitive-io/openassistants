@@ -66,5 +66,5 @@ class DuckDuckGoToolFunction(BaseFunction):
                 f"Error while executing action function {self.id}. function raised: {e}"
             ) from e
 
-    async def get_parameters_json_schema(self) -> dict:
+    def get_parameters_json_schema(self) -> dict:
         return self.parameters.json_schema

@@ -4,16 +4,16 @@ from typing import Dict, List, TypedDict
 from langchain.chat_models.base import BaseChatModel
 from langchain.schema.messages import HumanMessage
 from openassistants.data_models.chat_messages import OpasMessage
-from openassistants.functions.base import BaseFunction, Entity
+from openassistants.functions.base import IBaseFunction, IEntity
 from openassistants.llm_function_calling.utils import (
     build_chat_history_prompt,
     generate_to_json,
 )
 
 
-async def generate_argument_decisions_schema(function: BaseFunction):
+async def generate_argument_decisions_schema(function: IBaseFunction):
     # Start with the base schema
-    json_schema = await function.get_parameters_json_schema()
+    json_schema = function.get_parameters_json_schema()
 
     properties = {
         key: {"$ref": "#/definitions/nestedObject"}
@@ -50,7 +50,7 @@ ArgumentDecisionDict = Dict[str, NestedObject]
 
 
 async def generate_argument_decisions(
-    function: BaseFunction,
+    function: IBaseFunction,
     chat: BaseChatModel,
     user_query: str,
     chat_history: List[OpasMessage],
@@ -63,7 +63,7 @@ async def generate_argument_decisions(
 {build_chat_history_prompt(chat_history)}
 
 We are analyzing the following function:
-{await function.get_signature()}
+{function.get_signature()}
 
 For each of the arguments decide:
 - Should the argument be used?
@@ -85,21 +85,21 @@ Respond in JSON.
     return result
 
 
-def entity_to_json_schema_obj(entity: Entity):
-    d = {"const": entity.identity}
-    if entity.description is not None:
-        d["description"] = entity.description
+def entity_to_json_schema_obj(entity: IEntity):
+    d = {"const": entity.get_identity}
+    if entity.get_description is not None:
+        d["description"] = entity.get_description
     return d
 
 
 async def generate_arguments(
-    function: BaseFunction,
+    function: IBaseFunction,
     chat: BaseChatModel,
     user_query: str,
     chat_history: List[OpasMessage],
-    entities_info: Dict[str, List[Entity]],
+    entities_info: Dict[str, List[IEntity]],
 ) -> dict:
-    json_schema = deepcopy(await function.get_parameters_json_schema())
+    json_schema = deepcopy(function.get_parameters_json_schema())
 
     # inject the parameter entity definitions
     for param, entities in entities_info.items():
@@ -114,7 +114,7 @@ async def generate_arguments(
 {build_chat_history_prompt(chat_history)}
 
 We want to invoke the following function:
-{await function.get_signature()}
+{function.get_signature()}
 
 Provide the arguments for the function call that match the user_prompt.
 
