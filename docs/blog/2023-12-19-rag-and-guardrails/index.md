@@ -7,7 +7,7 @@ tags: [openassisstants, ai, rag, guardrails, llm]
 
 The integration of AI chatbots into customer service showcase technological advancement, yet they present unique challenges. A vivid example comes from a chatbot deployed at a Chevrolet dealership in Watsonville, which encountered an unusual request for a Python script to solve fluid dynamics equations. This incident highlights the necessity for precise AI applications, an area where OpenAssistants’ platform excels with its Retrieval-Augmented Generation (RAG) and guardrail features.
 
-![A chatbot mistakenly asked for a Python script](/img/chevy_watsonville.png)
+<img src="/openassistants/img/chevy_watsonville.jpeg" style={{maxWidth: "400px", width: "100%"}} />
 
 ## Domain-Specific AI Through RAG
 
