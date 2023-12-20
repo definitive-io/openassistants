@@ -6,6 +6,7 @@ from typing import List, Mapping, Optional, Sequence
 from langchain_core.language_models import BaseChatModel
 from openassistants.data_models.chat_messages import OpasMessage
 from openassistants.data_models.function_output import FunctionOutput
+from openassistants.data_models.json_schema import EMPTY_JSON_SCHEMA, JSONSchema
 from openassistants.functions.utils import AsyncStreamVersion
 from openassistants.utils.json_schema import PyRepr
 from pydantic import BaseModel
@@ -56,7 +57,7 @@ class IBaseFunction(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def get_parameters_json_schema(self) -> dict:
+    def get_parameters_json_schema(self) -> JSONSchema:
         """
         Get the json schema of the function's parameters
         """
@@ -120,6 +121,10 @@ class EntityConfig(IEntityConfig, BaseModel):
         return self.entities
 
 
+class BaseFunctionParameters(BaseModel):
+    json_schema: JSONSchema = EMPTY_JSON_SCHEMA
+
+
 class BaseFunction(IBaseFunction, BaseModel, abc.ABC):
     id: str
     type: str
@@ -127,6 +132,7 @@ class BaseFunction(IBaseFunction, BaseModel, abc.ABC):
     description: str
     sample_questions: List[str] = []
     confirm: bool = False
+    parameters: BaseFunctionParameters = BaseFunctionParameters()
 
     def get_id(self) -> str:
         return self.id
@@ -145,6 +151,9 @@ class BaseFunction(IBaseFunction, BaseModel, abc.ABC):
 
     def get_confirm(self) -> bool:
         return self.confirm
+
+    def get_parameters_json_schema(self) -> JSONSchema:
+        return self.parameters.json_schema
 
     async def get_entity_configs(self) -> Mapping[str, IEntityConfig]:
         return {}

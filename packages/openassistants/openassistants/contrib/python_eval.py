@@ -1,7 +1,6 @@
 import inspect
 from typing import Any, Callable, Dict, List, Literal, Sequence
 
-from openassistants.data_models.function_input import BaseJSONSchema
 from openassistants.data_models.function_output import FunctionOutput
 from openassistants.functions.base import (
     BaseFunction,
@@ -13,7 +12,6 @@ from pydantic import TypeAdapter
 
 class PythonEvalFunction(BaseFunction):
     type: Literal["PythonEvalFunction"] = "PythonEvalFunction"
-    parameters: BaseJSONSchema
     python_code: str
 
     async def execute(
@@ -47,6 +45,3 @@ class PythonEvalFunction(BaseFunction):
             raise RuntimeError(
                 f"Error while executing action function {self.id}. function raised: {e}"
             ) from e
-
-    def get_parameters_json_schema(self) -> dict:
-        return self.parameters.json_schema

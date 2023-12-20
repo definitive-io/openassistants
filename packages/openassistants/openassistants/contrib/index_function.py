@@ -23,6 +23,3 @@ class IndexFunction(BaseFunction):
             output += f"""**{function.get_display_name()}**
 {function.get_description()}\n\n"""
             yield [TextOutput(text=output)]
-
-    def get_parameters_json_schema(self) -> dict:
-        return {"type": "object", "properties": {}}

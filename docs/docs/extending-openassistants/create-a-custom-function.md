@@ -14,7 +14,6 @@ The following Python function:
 
 class PythonEvalFunction(BaseFunction):
     type: Literal["PythonEvalFunction"] = "PythonEvalFunction"
-    parameters: BaseJSONSchema
     python_code: str
 
     async def execute(

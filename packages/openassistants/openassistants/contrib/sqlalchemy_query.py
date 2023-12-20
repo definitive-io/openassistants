@@ -1,6 +1,7 @@
 import asyncio
 from typing import Annotated, Any, List, Literal, Sequence
 
+import jsonschema
 import pandas as pd
 from langchain.schema import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from openassistants.data_models.chat_messages import (
@@ -9,7 +10,6 @@ from openassistants.data_models.chat_messages import (
     OpasMessage,
 )
 from openassistants.data_models.function_input import (
-    BaseJSONSchema,
     FunctionCall,
 )
 from openassistants.data_models.function_output import (
@@ -69,7 +69,6 @@ def _opas_to_summarization_lc(
 
 class QueryFunction(BaseFunction):
     type: Literal["QueryFunction"] = "QueryFunction"
-    parameters: BaseJSONSchema
     sqls: List[str]
     visualizations: List[str]
     summarization: str
@@ -153,7 +152,10 @@ You will:
         self,
         deps: FunctionExecutionDependency,
     ) -> AsyncStreamVersion[Sequence[FunctionOutput]]:
-        self.parameters.validate_args(deps.arguments)
+        try:
+            jsonschema.validate(deps.arguments, self.get_parameters_json_schema())
+        except jsonschema.ValidationError as e:
+            raise ValueError(f"Invalid arguments:\n{str(e)}") from e
 
         results: List[FunctionOutput] = []
 
@@ -203,6 +205,3 @@ You will:
         )
 
         yield results
-
-    def get_parameters_json_schema(self) -> dict:
-        return self.parameters.json_schema
