@@ -7,13 +7,14 @@ from openassistants.contrib.duckdb_query import DuckDBQueryFunction
 from openassistants.contrib.langchain_ddg_tool import DuckDuckGoToolFunction
 from openassistants.contrib.python_eval import PythonEvalFunction
 from openassistants.contrib.sqlalchemy_query import QueryFunction
+from openassistants.contrib.text_response import TextResponseFunction
 from openassistants.functions.base import BaseFunction, IBaseFunction
 from openassistants.utils import yaml
 from pydantic import Field, TypeAdapter
 from starlette.concurrency import run_in_threadpool
 
 AllFunctionTypes = Annotated[
-    QueryFunction | DuckDBQueryFunction | PythonEvalFunction | DuckDuckGoToolFunction,
+    QueryFunction | DuckDBQueryFunction | PythonEvalFunction | DuckDuckGoToolFunction | TextResponseFunction,
     Field(json_schema_extra={"discriminator": "type"}),
 ]
 
