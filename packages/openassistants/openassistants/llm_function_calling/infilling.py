@@ -86,9 +86,9 @@ Respond in JSON.
 
 
 def entity_to_json_schema_obj(entity: IEntity):
-    d = {"const": entity.get_identity}
+    d = {"const": entity.get_identity()}
     if entity.get_description is not None:
-        d["description"] = entity.get_description
+        d["description"] = entity.get_description()
     return d
 
 
