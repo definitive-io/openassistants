@@ -78,8 +78,6 @@ export function OpenAssistantsChatMessage({
   isLoading,
   ...props
 }: DefinitiveChatMessageProps) {
-  const defaultCollapsed = false; // useful for testing
-  const [collapsed, setCollapsed] = useState(defaultCollapsed);
   const [isEditing, setIsEditing] = useState(false);
   const [editedMessageContent, setEditedMessageContent] = useState<string>('');
   const content = getContent(message);
@@ -152,9 +150,7 @@ export function OpenAssistantsChatMessage({
         {!isEditing && (
           <div>
             <MemoizedReactMarkdown
-              className={`prose break-words prose-p:leading-relaxed prose-pre:p-0 ${
-                collapsed ? 'collapsed' : ''
-              }`}
+              className={`prose break-words prose-p:leading-relaxed prose-pre:p-0`}
               remarkPlugins={[remarkGfm]}
               components={{
                 p({ children }) {
@@ -184,14 +180,14 @@ export function OpenAssistantsChatMessage({
                   }
                   return (
                     <div>
-                      {!collapsed && (
+                      {
                         <CodeBlock
                           key={Math.random()}
                           language={(match && match[1]) || ''}
                           value={String(children).replace(/\n$/, '')}
                           {...props}
                         />
-                      )}
+                      }
                     </div>
                   );
                 },
