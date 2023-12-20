@@ -3,9 +3,9 @@ from typing import Sequence
 import anyio
 import pandas as pd
 from openassistants.contrib.python_callable import PythonCallableFunction
-from openassistants.data_models.function_input import BaseJSONSchema
 from openassistants.data_models.function_output import FunctionOutput, TextOutput
 from openassistants.functions.base import (
+    BaseFunctionParameters,
     Entity,
     EntityConfig,
     FunctionExecutionDependency,
@@ -64,7 +64,7 @@ find_email_by_name_function = PythonCallableFunction(
         "Find the email address for {employee}",
         "What is {employee}'s email address?",
     ],
-    parameters=BaseJSONSchema(
+    parameters=BaseFunctionParameters(
         json_schema={
             "type": "object",
             "properties": {
