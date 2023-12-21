@@ -14,7 +14,6 @@ export const RenderVisMessage = ({
 }: RenderVisMessageProps) => {
   const Plotly =
     typeof window !== 'undefined' ? require('plotly.js-dist-min') : null;
-  console.log('Plotly', Plotly);
   useEffect(() => {
     if (!data || !layout) {
       return;
