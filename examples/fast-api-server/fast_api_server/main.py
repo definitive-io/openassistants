@@ -2,7 +2,7 @@ from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from openassistants.core.assistant import Assistant
 from openassistants.functions.crud import PythonCRUD
-from openassistants_fastapi.routes import RouteAssistants, create_router
+from openassistants_fastapi import RouteAssistants, create_router
 
 from fast_api_server.find_email_by_name_function import find_email_by_name_function
 
@@ -14,7 +14,7 @@ custom_python_lib = PythonCRUD(functions=[find_email_by_name_function])
 hooli_assistant = Assistant(
     libraries=["piedpiper", custom_python_lib],
     scope_description="""Only answer questions about Hooli company related matters.
-You're also allowed to answer questions that refer to anything in the current chat history.""",
+You're also allowed to answer questions that refer to anything in the current chat history.""",  # noqa: E501
 )
 
 route_assistants = RouteAssistants(assistants={"hooli": hooli_assistant})
