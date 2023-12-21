@@ -69,9 +69,7 @@ class LocalCRUD(FunctionCRUD):
 
     def list_ids(self) -> List[str]:
         return [
-            file.stem
-            for file in self.directory.iterdir()
-            if file.suffix == ".yaml" or file.suffix == ".py"
+            file.stem for file in self.directory.iterdir() if file.suffix == ".yaml"
         ]
 
 
