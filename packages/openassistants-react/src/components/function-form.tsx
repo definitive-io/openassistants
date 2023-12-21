@@ -9,6 +9,7 @@ import { cn } from '../lib/utils';
 
 interface FuncionFormProps extends React.ComponentProps<'div'> {
   message: AssistantMessage;
+  submitted: boolean;
   onSubmit: (values: any) => void;
 }
 
@@ -44,8 +45,11 @@ const SelectWidget = (props: WidgetProps) => {
   );
 };
 
-export function FunctionForm({ message, onSubmit }: FuncionFormProps) {
-  const [submitted, setSubmitted] = React.useState(false);
+export function FunctionForm({
+  message,
+  submitted,
+  onSubmit,
+}: FuncionFormProps) {
   const json_schema = message?.input_request?.json_schema;
   const uiSchema = {};
   // expand with more widgets
@@ -120,7 +124,6 @@ export function FunctionForm({ message, onSubmit }: FuncionFormProps) {
           validator={validator}
           onSubmit={(form) => {
             onSubmit(form.formData);
-            setSubmitted(true);
           }}
           onError={() => console.log('errors')}
         />

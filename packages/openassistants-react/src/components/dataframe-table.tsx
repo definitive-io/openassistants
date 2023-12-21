@@ -22,7 +22,9 @@ export const DataframeTable = ({
       className="max-h-96 overflow-y-auto px-4 mx-auto overflow-x-auto"
       style={{ maxWidth: '90vw' }}
     >
-      <h2 className={cn('text-xl text-center text-primary mb-4')}>{title}</h2>
+      {title && (
+        <h2 className={cn('text-xl text-center text-primary mb-4')}>{title}</h2>
+      )}
       <Table
         className={cn(
           'w-full table-auto divide-y divide-gray-700 sm:table-fixed'
