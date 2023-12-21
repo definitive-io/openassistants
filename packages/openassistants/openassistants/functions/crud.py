@@ -3,6 +3,7 @@ import asyncio
 from pathlib import Path
 from typing import Annotated, List, Optional
 
+from openassistants.contrib.advisor_function import AdvisorFunction
 from openassistants.contrib.duckdb_query import DuckDBQueryFunction
 from openassistants.contrib.langchain_ddg_tool import DuckDuckGoToolFunction
 from openassistants.contrib.python_eval import PythonEvalFunction
@@ -14,7 +15,12 @@ from pydantic import Field, TypeAdapter
 from starlette.concurrency import run_in_threadpool
 
 AllFunctionTypes = Annotated[
-    QueryFunction | DuckDBQueryFunction | PythonEvalFunction | DuckDuckGoToolFunction | TextResponseFunction,
+    QueryFunction
+    | DuckDBQueryFunction
+    | PythonEvalFunction
+    | DuckDuckGoToolFunction
+    | TextResponseFunction
+    | AdvisorFunction,
     Field(json_schema_extra={"discriminator": "type"}),
 ]
 
