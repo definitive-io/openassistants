@@ -8,6 +8,7 @@ export interface ChatContentProps {
 }
 
 export const ChatContent = ({ content }: ChatContentProps) => {
+  console.log('content', content);
   return (
     <div>
       <MemoizedReactMarkdown
@@ -27,7 +28,7 @@ export const ChatContent = ({ content }: ChatContentProps) => {
 
               children[0] = (children[0] as string).replace('`▍`', '▍');
             }
-
+            console.log('className', className);
             const match = /language-(\w+)/.exec(className || '');
 
             if (inline) {
