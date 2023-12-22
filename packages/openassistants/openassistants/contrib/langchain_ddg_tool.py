@@ -45,7 +45,12 @@ class DuckDuckGoToolFunction(BaseFunction):
             if "query" in deps.arguments:
                 query = deps.arguments["query"]
 
-                results = ddgs_text(query, max_results=4)
+                try:
+                    results = ddgs_text(query, max_results=4)
+                except RuntimeError:
+                    yield [TextOutput(text="DuckDuckGo is currently unavailable, please try again later.")]
+                    return
+
                 formatted_results = "\n\n".join(
                     f"**{result['title']}**  \n_{result['body']}_"
                     for index, result in enumerate(results)
