@@ -57,7 +57,6 @@ async def _get_entity_configs() -> dict[str, EntityConfig]:
 
 find_email_by_name_function = PythonCallableFunction(
     id="find_email",
-    type="FindEmailFunction",
     display_name="Find Email",
     description="Find an email address",
     sample_questions=[

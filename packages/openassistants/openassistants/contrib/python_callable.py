@@ -1,4 +1,4 @@
-from typing import Awaitable, Callable, Mapping, Sequence
+from typing import Awaitable, Callable, Literal, Mapping, Optional, Sequence
 
 from openassistants.data_models.function_output import FunctionOutput
 from openassistants.functions.base import (
@@ -10,11 +10,14 @@ from openassistants.functions.utils import AsyncStreamVersion
 
 
 class PythonCallableFunction(BaseFunction):
+    type: Literal["PythonCallableFunction"] = "PythonCallableFunction"
     execute_callable: Callable[
         [FunctionExecutionDependency], AsyncStreamVersion[Sequence[FunctionOutput]]
     ]
 
-    get_entity_configs_callable: Callable[[], Awaitable[Mapping[str, IEntityConfig]]]
+    get_entity_configs_callable: Optional[
+        Callable[[], Awaitable[Mapping[str, IEntityConfig]]]
+    ] = None
 
     async def execute(
         self, deps: FunctionExecutionDependency
@@ -23,4 +26,6 @@ class PythonCallableFunction(BaseFunction):
             yield output
 
     async def get_entity_configs(self) -> Mapping[str, IEntityConfig]:
+        if self.get_entity_configs_callable is None:
+            return {}
         return await self.get_entity_configs_callable()

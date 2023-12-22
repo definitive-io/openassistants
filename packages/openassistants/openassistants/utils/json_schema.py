@@ -7,6 +7,8 @@ from pydantic import BaseModel
 class Node(BaseModel):
     @staticmethod
     def build(json_schema: dict):
+        if "type" not in json_schema:
+            return ObjectNode(children={})
         if json_schema["type"] == "object":
             return ObjectNode(
                 children={
