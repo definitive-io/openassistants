@@ -12,6 +12,7 @@ definitive-openassistants-fastapi = { path = "../../packages/openassistants-fast
 fastapi = "^0.104.1"
 uvicorn = "^0.24.0.post1"
 watchfiles = "^0.21.0"
+redis = "^5.0.1"
 
 
 [tool.poetry.group.test.dependencies]
