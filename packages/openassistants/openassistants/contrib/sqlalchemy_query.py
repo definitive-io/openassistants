@@ -40,8 +40,12 @@ def run_sql(sqlalchemy_engine: Engine, sql: str, parameters: dict) -> pd.DataFra
         # Use SQLAlchemy's text function to create a SQL expression
         # Bind parameters to the SQL expression to prevent SQL injection
         result = connection.execute(text(sql), parameters)
-        df = pd.DataFrame(result.fetchall())
-        df.columns = pd.Index([str(key) for key in result.keys()])
+        allResults = result.fetchall()
+        if len(allResults) == 0:
+            df = pd.DataFrame(columns=[str(key) for key in result.keys()])
+        else:
+            df = pd.DataFrame(result.fetchall())
+            df.columns = pd.Index([str(key) for key in result.keys()])
     return df
 
 
