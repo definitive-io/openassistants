@@ -44,7 +44,7 @@ def run_sql(sqlalchemy_engine: Engine, sql: str, parameters: dict) -> pd.DataFra
         if len(allResults) == 0:
             df = pd.DataFrame(columns=[str(key) for key in result.keys()])
         else:
-            df = pd.DataFrame(result.fetchall())
+            df = pd.DataFrame(allResults)
             df.columns = pd.Index([str(key) for key in result.keys()])
     return df
 
