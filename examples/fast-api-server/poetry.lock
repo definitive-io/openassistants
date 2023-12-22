@@ -593,7 +593,7 @@ typing-inspect = ">=0.4.0,<1"
 
 [[package]]
 name = "definitive-openassistants"
-version = "0.0.7"
+version = "0.0.8"
 description = ""
 optional = false
 python-versions = ">=3.10,<3.12"
@@ -611,6 +611,7 @@ openai = "^1.3.7"
 openapi-pydantic = "^0.3.2"
 pandas = "^2.1.3"
 pydantic = "^2.5.2"
+requests = "^2.31.0"
 ruamel-yaml = "^0.18.5"
 sqlalchemy = {version = "^2.0.23", optional = true}
 starlette = ">=0.27.0,<0.28.0"
@@ -629,7 +630,7 @@ url = "../../packages/openassistants"
 
 [[package]]
 name = "definitive-openassistants-fastapi"
-version = "0.0.3"
+version = "0.0.4"
 description = ""
 optional = false
 python-versions = ">=3.10,<3.12"
