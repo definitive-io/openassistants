@@ -1,10 +1,11 @@
 import os
 from typing import Dict, List, Literal, Optional, Sequence
 
+from duckduckgo_search.exceptions import RateLimitException
 from openassistants.data_models.function_output import FunctionOutput, TextOutput
 from openassistants.functions.base import BaseFunction, FunctionExecutionDependency
 from openassistants.functions.utils import AsyncStreamVersion
-from duckduckgo_search.exceptions import RateLimitException
+
 
 def ddgs_text(query: str, max_results: Optional[int] = None) -> List[Dict[str, str]]:
     """Run query through DuckDuckGo text search and return results."""
@@ -48,7 +49,11 @@ class DuckDuckGoToolFunction(BaseFunction):
                 try:
                     results = ddgs_text(query, max_results=4)
                 except RateLimitException:
-                    yield [TextOutput(text="DuckDuckGo is currently unavailable, please try again later.")]
+                    yield [
+                        TextOutput(
+                            text="DuckDuckGo is currently unavailable, please try again later."  # noqa: E501
+                        )
+                    ]
                     return
 
                 formatted_results = "\n\n".join(

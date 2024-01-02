@@ -10,7 +10,7 @@ AsyncStreamVersion = AsyncGenerator[T, None]
 logger = logging.getLogger(__name__)
 
 
-async def last_value(src: AsyncStreamVersion) -> T:
+async def last_value(src: AsyncStreamVersion[T]) -> T:
     last = None
     try:
         async for last in src:

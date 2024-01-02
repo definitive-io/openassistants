@@ -1,8 +1,8 @@
 import os
 from typing import Literal, Sequence
 
+import httpx
 import pandas as pd
-import requests
 from openassistants.data_models.function_output import (
     DataFrameOutput,
     FunctionOutput,
@@ -28,6 +28,12 @@ async def advisor_query(
     BEARER_TOKEN = os.getenv("ADVISOR_BEARER_TOKEN")
     ADVISOR_API_BASE = os.getenv("ADVISOR_API_BASE")
 
+    if ADVISOR_API_BASE is None:
+        raise ValueError("ADVISOR_API_BASE environment variable not set")
+
+    if BEARER_TOKEN is None:
+        raise ValueError("ADVISOR_BEARER_TOKEN environment variable not set")
+
     # Headers for the requests
     HEADERS = {
         "accept": "application/json",
@@ -41,63 +47,70 @@ async def advisor_query(
     outputs += "Searching for the relevant dataset...  \n"
     yield [TextOutput(text=outputs)]
 
-    response = requests.post(
-        ADVISOR_API_BASE + "/v0/datasets/recommend",
-        headers=HEADERS,
-        json=recommend_payload,
-    )
-    if response.status_code != 200:
-        print("Error in recommend step")
-        return
+    async with httpx.AsyncClient(timeout=120) as client:
+        response = await client.post(
+            ADVISOR_API_BASE + "/v0/datasets/recommend",
+            headers=HEADERS,
+            json=recommend_payload,
+        )
 
-    datasets = response.json().get("datasets")
-    if not datasets:
-        # Override yield
-        yield [TextOutput(text="No relevant datasets found.  \n")]
-        return
+        if response.status_code != 200:
+            print("Error in recommend step")
+            return
 
-    outputs += f"Found relevant dataset: `{datasets[0]['id']}`.  \n"
-    yield [TextOutput(text=outputs)]
+        datasets = response.json().get("datasets")
+        if not datasets:
+            # Override yield
+            yield [TextOutput(text="No relevant datasets found.  \n")]
+            return
 
-    # Step 2: Generate SQL based on the dataset and user query
-    prompt_payload = {"prompt": user_query, "dataset": datasets[0], "timeout": 60}
+        outputs += f"Found relevant dataset: `{datasets[0]['id']}`.  \n"
+        yield [TextOutput(text=outputs)]
 
-    outputs += "Generating SQL query...  \n"
-    yield [TextOutput(text=outputs)]
+        # Step 2: Generate SQL based on the dataset and user query
+        prompt_payload = {"prompt": user_query, "dataset": datasets[0], "timeout": 60}
 
-    response = requests.post(
-        ADVISOR_API_BASE + "/v0/datasets/prompt", headers=HEADERS, json=prompt_payload
-    )
-    if response.status_code != 200:
-        print("Error in prompt step")
-        return
+        outputs += "Generating SQL query...  \n"
+        yield [TextOutput(text=outputs)]
 
-    sql_query = response.json().get("response", {}).get("sql")
-    if not sql_query:
-        print("No SQL query found in prompt response")
-        return
+        response = await client.post(
+            ADVISOR_API_BASE + "/v0/datasets/prompt",
+            headers=HEADERS,
+            json=prompt_payload,
+        )
+        if response.status_code != 200:
+            print("Error in prompt step")
+            return
 
-    # Step 3: Execute SQL
-    execute_payload = {
-        "query": {"type": "sql", "sql": sql_query},
-        "dataset": datasets[0],
-        "timeout": 60,
-        "mode": "nonblocking",
-    }
+        sql_query = response.json().get("response", {}).get("sql")
+        if not sql_query:
+            print("No SQL query found in prompt response")
+            return
 
-    outputs += "Running SQL query...  \n"
-    yield [TextOutput(text=outputs)]
+        # Step 3: Execute SQL
+        execute_payload = {
+            "query": {"type": "sql", "sql": sql_query},
+            "dataset": datasets[0],
+            "timeout": 60,
+            "mode": "nonblocking",
+        }
 
-    response = requests.post(
-        ADVISOR_API_BASE + "/v0/datasets/execute", headers=HEADERS, json=execute_payload
-    )
-    if response.status_code != 200 or "error" in response.json():
-        print("Error in execute step")
-        return
+        outputs += "Running SQL query...  \n"
+        yield [TextOutput(text=outputs)]
 
-    # Parsing the result into a DataFrame
-    result = response.json().get("result", {}).get("dataframe", {})
-    error = response.json().get("error")
+        response = await client.post(
+            ADVISOR_API_BASE + "/v0/datasets/execute",
+            headers=HEADERS,
+            json=execute_payload,
+        )
+
+        if response.status_code != 200 or "error" in response.json():
+            print("Error in execute step")
+            return
+
+        # Parsing the result into a DataFrame
+        result = response.json().get("result", {}).get("dataframe", {})
+        error = response.json().get("error")
 
     if error:
         yield [TextOutput(text=f"Failed to execute SQL: {error['message']}")]

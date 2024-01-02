@@ -1,9 +1,10 @@
 from typing import Annotated, List, Literal, Optional
 
 from langchain.schema.messages import BaseMessage, merge_content
+from pydantic import BaseModel, Field
+
 from openassistants.data_models.function_input import FunctionCall, FunctionInputRequest
 from openassistants.data_models.function_output import FunctionOutput
-from pydantic import BaseModel, Field
 
 
 class OpasUserMessage(BaseModel):
