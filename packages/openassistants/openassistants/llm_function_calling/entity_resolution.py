@@ -35,8 +35,8 @@ def entity_to_document(entity: IEntity) -> Document:
         metadata=dict(id=entity.get_identity()), page_content=entity.get_identity()
     )
 
-    if entity.get_description:
-        doc.page_content += f" ({entity.get_description})"
+    if entity.get_description():
+        doc.page_content += f" ({entity.get_description()})"
 
     return doc
 
