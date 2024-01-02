@@ -3,7 +3,17 @@ import asyncio
 import json
 from json.decoder import JSONDecodeError
 from pathlib import Path
-from typing import Annotated, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import (
+    Annotated,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+)
 
 from langchain.chains.openai_functions.openapi import openapi_spec_to_openai_fn
 from langchain_community.utilities.openapi import OpenAPISpec
@@ -74,7 +84,7 @@ class LocalCRUD(FunctionCRUD):
         except Exception as e:
             raise RuntimeError(f"Failed to load: {function_id}") from e
 
-    async def aread_all(self) -> List[BaseFunction]:
+    async def aread_all(self) -> List[IBaseFunction]:
         ids = self.list_ids()
         return [self.read(f_id) for f_id in ids]  # type: ignore
 
@@ -85,7 +95,7 @@ class LocalCRUD(FunctionCRUD):
 
 
 class PythonCRUD(FunctionCRUD):
-    def __init__(self, functions: List[IBaseFunction]):
+    def __init__(self, functions: Sequence[IBaseFunction]):
         self.functions = functions
 
     def read(self, slug: str) -> Optional[IBaseFunction]:
