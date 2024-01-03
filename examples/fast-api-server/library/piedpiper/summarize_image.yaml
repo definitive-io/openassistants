@@ -1,0 +1,13 @@
+display_name: Summarize Image
+description: |
+  Analyzes and describes an image
+sample_questions:
+  - Analyze this image
+parameters:
+  json_schema:
+    type: object
+    properties: {}
+    required: []
+type: ImageAnalysisFunction
+image_path: 'images/'
+file_name: 'unnamed-14.png'
