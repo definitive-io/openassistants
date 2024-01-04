@@ -1,0 +1,122 @@
+display_name: Recap NBA game
+description: |
+  Recap the NBA game (i.e. "Recap the Knicks game")
+sample_questions:
+  - Recap the NBA game
+parameters:
+  json_schema:
+    type: object
+    properties:
+      team:
+        type: string
+        format: STRING
+        description: NBA team name
+    required:
+      - team
+type: DuckDBQueryFunction
+dataset: 'dummy-data/'
+sqls:
+  - |
+    SELECT date,home_team,away_team,home_team_abbr,away_team_abbr,home_team_winner,away_team_winner,home_team_score,away_team_score,venue,location,home_team_overall_record,away_team_overall_record,
+      CASE WHEN status_detail like '%3OT%' THEN '3OT' WHEN status_detail like '%2OT%' THEN '2OT' WHEN status_detail like '%OT%' THEN 'OT' ELSE NULL end as overtime_status
+    FROM "game_summaries.csv"
+    WHERE (
+      lower(home_team) like CONCAT('%',lower(:team),'%') or 
+      lower(away_team) like CONCAT('%',lower(:team),'%') or 
+      lower(home_team_abbr) like CONCAT('%',lower(:team),'%') or 
+      lower(away_team_abbr) like CONCAT('%',lower(:team),'%')
+    )
+  - |
+    SELECT team_abbr,pts,fg_pct,fg3m,fg3_pct,ftm,ft_pct,oreb,dreb,reb,ast,stl,blk,tov,pts_off_tov,fst_brk_pts,pts_in_pnt,pf
+        FROM "team_boxscores.csv"
+        WHERE game_id in (
+          SELECT game_id
+          FROM "game_summaries.csv"
+          WHERE (
+            lower(home_team) like CONCAT('%',lower(:team),'%') or 
+            lower(away_team) like CONCAT('%',lower(:team),'%') or 
+            lower(home_team_abbr) like CONCAT('%',lower(:team),'%') or 
+            lower(away_team_abbr) like CONCAT('%',lower(:team),'%')
+          )
+        )
+        ORDER BY team_abbr
+  - |
+    WITH ranked_players AS (
+      SELECT
+        player_name,
+        position,
+        team_abbr,
+        starter_flg,
+        mp,
+        fg,
+        fg3,
+        ft,
+        oreb,
+        dreb,
+        reb,
+        ast,
+        stl,
+        blk,
+        tov,
+        pf,
+        plus_minus,
+        pts,
+        ROW_NUMBER() OVER (
+          PARTITION BY team_abbr 
+          ORDER BY 
+            CAST(pts AS FLOAT) + 0.4 * CAST(SPLIT_PART(fg, '-', 1) AS FLOAT) + 0.7 * CAST(oreb AS FLOAT) + 
+            0.3 * CAST(dreb AS FLOAT) + CAST(stl AS FLOAT) + 0.7 * CAST(ast AS FLOAT) + 0.7 * CAST(blk AS FLOAT) - 
+            0.7 * CAST(SPLIT_PART(fg, '-', 2) AS FLOAT) - 0.4 * (CAST(SPLIT_PART(ft, '-', 2) AS FLOAT) - CAST(SPLIT_PART(ft, '-', 1) AS FLOAT)) - 
+            0.4 * CAST(pf AS FLOAT) - CAST(tov AS FLOAT) DESC
+        ) AS rn
+      FROM "player_boxscores.csv"
+      WHERE game_id IN (
+        SELECT game_id
+        FROM "game_summaries.csv"
+        WHERE (
+          lower(home_team) like CONCAT('%',lower(:team),'%') or 
+          lower(away_team) like CONCAT('%',lower(:team),'%') or 
+          lower(home_team_abbr) like CONCAT('%',lower(:team),'%') or 
+          lower(away_team_abbr) like CONCAT('%',lower(:team),'%')
+        )
+      )
+    )
+    SELECT
+      player_name,
+      position,
+      team_abbr,
+      starter_flg,
+      mp,
+      fg,
+      fg3,
+      ft,
+      oreb,
+      dreb,
+      reb,
+      ast,
+      stl,
+      blk,
+      tov,
+      pf,
+      plus_minus,
+      pts
+    FROM ranked_players
+    WHERE rn <= 3
+    ORDER BY rn
+    LIMIT 4;
+
+visualizations: []
+summarization: |
+  Please provide a succinct yet engaging recap of the latest NBA game, strictly adhering to the provided format and utilizing the available high-level box score stats. The recap should be informative yet conversational, focusing on the statistics to explain the game's outcome:
+
+  INTRODUCTION: Introduce the teams, the game date, the final score, mention only if the game went into overtime (ignore if it didn't), the winner, the game location, the top scorer from the winning team, and the teams' updated records
+
+  MATCHUP BREAKDOWN: Use team stats to succinctly explain why the winning team prevailed. Avoid over-elaboration, but provide enough detail to give a clear understanding of how the game was won, highlighting critical statistical advantages for the winning team. Avoid overstating areas where the winning team was not statistically superior, unless to say that they overcame that category.
+
+  KEY PLAYERS: Identify the standout players from each team, using their box score stats. Briefly describe how their performance was instrumental to their team's efforts in the game. Focus on weaving the players' stats into the narrative without lengthy elaboration.
+
+  CONCLUSION: Summarize the game with a focus on the statistical strengths that led to the winning team's victory. The conclusion should be brief, tying together the key points from the game.
+
+  The aim is to balance between a dry listing of statistics and an overly narrative approach. Use the stats to support concise explanations of the game's dynamics and outcomes. Be particularly careful that the statistics are accurately presented and associate players correctly with their teams.
+
+  Note: Be VERY careful not to misrepresent statistics. If team had a lower 3 point percentage or fewer 3 pointers made, that means they DID NOT have the edge in three-point shooting. This statement is WRONG: "However, the Kings had the edge in three-point shooting, making 15 three-pointers compared to the Magic's 25. The Kings had a three-point percentage of 37.5%, while the Magic had an impressive 56.8% from beyond the arc."

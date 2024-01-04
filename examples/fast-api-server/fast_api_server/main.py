@@ -38,8 +38,8 @@ else:
 
 
 hooli_assistant = Assistant(
-    libraries=["piedpiper", custom_python_lib, openapi_lib],
-    scope_description="""Only answer questions about Hooli company related matters.
+    libraries=["nba", custom_python_lib, openapi_lib],
+    scope_description="""Only answer questions about NBA related matters.
 You're also allowed to answer questions that refer to anything in the current chat history.""",  # noqa: E501
     entity_embedding_model=entity_embedding_model,
 )
