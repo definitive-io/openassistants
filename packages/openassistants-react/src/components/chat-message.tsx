@@ -97,28 +97,6 @@ export function OpenAssistantsChatMessage({
           {message && getIcon(message)}
         </div>
         <div className={cn('flex flex-col')}>
-          {message.role === 'assistant' && message.input_request && (
-            // add padding
-            <div className={cn('px-8')}>
-              <FunctionForm
-                message={message}
-                submitted={submitted}
-                onSubmit={(values) => {
-                  const newMessage = {
-                    role: 'user' as const,
-                    input_response: {
-                      name: message.input_request!.name,
-                      arguments: values,
-                    },
-                    content: '',
-                  };
-                  setSubmitted(true);
-                  append(newMessage);
-                }}
-              ></FunctionForm>
-            </div>
-          )}
-
           <div className="ml-4 flex-1 space-y-2 overflow-hidden px-1 text-primary">
             {isEditing && message.role === 'user' && (
               <div>
@@ -187,7 +165,7 @@ export function OpenAssistantsChatMessage({
               })}
             {'content' in message && !submitted && (
               <div>
-                <ChatContent content={message.content || ''} />
+                <ChatContent content={message.content?.trim() || ''} />
                 <ChatMessageActions
                   content={message.content}
                   actions={supportedActions}
@@ -196,6 +174,27 @@ export function OpenAssistantsChatMessage({
                     setEditedMessageContent(message.content || '');
                   }}
                 />
+              </div>
+            )}
+            {message.role === 'assistant' && message.input_request && (
+              // add padding
+              <div className={cn('px-8')}>
+                <FunctionForm
+                  message={message}
+                  submitted={submitted}
+                  onSubmit={(values) => {
+                    const newMessage = {
+                      role: 'user' as const,
+                      input_response: {
+                        name: message.input_request!.name,
+                        arguments: values,
+                      },
+                      content: '',
+                    };
+                    setSubmitted(true);
+                    append(newMessage);
+                  }}
+                ></FunctionForm>
               </div>
             )}
           </div>
