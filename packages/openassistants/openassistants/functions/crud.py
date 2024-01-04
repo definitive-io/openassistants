@@ -14,6 +14,8 @@ from openassistants.contrib.python_callable import PythonCallableFunction
 from openassistants.contrib.python_eval import PythonEvalFunction
 from openassistants.contrib.sqlalchemy_query import QueryFunction
 from openassistants.contrib.text_response import TextResponseFunction
+from openassistants.contrib.image_analysis import ImageAnalysisFunction
+from openassistants.contrib.dog_classification import DogClassificationFunction
 from openassistants.data_models.function_output import TextOutput
 from openassistants.data_models.json_schema import JSONSchema
 from openassistants.functions.base import (
@@ -31,6 +33,8 @@ AllFunctionTypes = Annotated[
     | PythonEvalFunction
     | DuckDuckGoToolFunction
     | TextResponseFunction
+    | ImageAnalysisFunction
+    | DogClassificationFunction
     | AdvisorFunction,
     Field(json_schema_extra={"discriminator": "type"}),
 ]

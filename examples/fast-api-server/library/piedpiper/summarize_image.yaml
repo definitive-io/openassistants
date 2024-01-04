@@ -9,5 +9,5 @@ parameters:
     properties: {}
     required: []
 type: ImageAnalysisFunction
-image_path: 'images/'
+image_path: 'dog_classification/'
 file_name: 'unnamed-14.png'

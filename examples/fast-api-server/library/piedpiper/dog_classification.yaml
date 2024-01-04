@@ -1,0 +1,13 @@
+display_name: Classify Dogs
+description: |
+  Classify Dogs
+sample_questions:
+  - Classify Dogs
+parameters:
+  json_schema:
+    type: object
+    properties: {}
+    required: []
+type: DogClassificationFunction
+base_path: 'dog_classification/'
+json_schema: 'dog_classification.json'
