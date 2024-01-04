@@ -8,24 +8,25 @@ export default function Home() {
       <div className="relative flex w-full h-full overflow-hidden">
         <div className="group w-full pl-0 animate-in duration-300 ease-in-out peer-[[data-state=open]]:lg:pl-[250px] peer-[[data-state=open]]:xl:pl-[300px]">
           <OpenAssistantsChat
-            api={`${process.env.NEXT_PUBLIC_API_URL ||
-              'http://localhost:8000'}/v1alpha/assistants/hooli/chat`}
-            name="Example Assistant"
+            api={`${
+              process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+            }/v1alpha/assistants/hooli/chat`}
+            name="NBA Recap Writing Assistant"
             starterPrompts={[
               {
-                title: 'Show recent purchases',
-                prompt: 'Show recent purchases',
+                title: 'Recap the Knicks game',
+                prompt: 'Recap the Knicks game',
               },
               {
-                title: 'Show spend all products',
-                prompt: 'Show spend all products',
+                title: 'Recap the Pacers game',
+                prompt: 'Recap the Pacers game',
               },
               {
-                title: 'What can I ask?',
-                prompt: 'What can I ask?',
+                title: 'Recap the Kings game',
+                prompt: 'Recap the Kings game',
               },
             ]}
-            welcomeMessage="This is a simple starter for deploying a nextjs app with an open assistant chat widget. This is configured to use the example library which builds off a couple csvs of employee and purchase data"
+            welcomeMessage="Stay updated with last night's NBA games! This application offers concise recaps, focusing on team statistics and key player performances to summarize the game's results."
             getToken={() => Promise.resolve('token')}
           ></OpenAssistantsChat>
         </div>
