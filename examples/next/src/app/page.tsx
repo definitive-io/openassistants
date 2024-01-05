@@ -12,16 +12,12 @@ export default function Home() {
             name="NBA Recap Writing Assistant"
             starterPrompts={[
               {
-                title: 'Recap the Kings game',
-                prompt: 'Recap the Kings game',
+                title: 'Recap the Warriors game',
+                prompt: 'Recap the Warriors game',
               },
               {
-                title: 'Recap the Pacers game',
-                prompt: 'Recap the Pacers game',
-              },
-              {
-                title: 'Recap the Hawks game',
-                prompt: 'Recap the Hawks game',
+                title: 'Recap the Bucks game',
+                prompt: 'Recap the Bucks game',
               },
             ]}
             welcomeMessage="Stay updated with last night's NBA games! This application offers concise recaps, focusing on team statistics and key player performances to summarize the game's results."
