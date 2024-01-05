@@ -1,1 +1,1 @@
-web: bash ./examples/fast-api-server/run.sh
+web: uvicorn main:app --host 0.0.0.0 --port ${PORT}
