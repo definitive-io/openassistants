@@ -348,11 +348,13 @@ class Assistant:
         )
 
     async def pre_process_messages(self, messages):
-        for idx, message in enumerate(messages):
-            if isinstance(message, OpasUserMessage) and isinstance(
-                message.content, list
-            ):
-                self.convert_list_message(messages, message, idx)
+        tasks = [
+            self.convert_list_message(messages, message, idx)
+            for idx, message in enumerate(messages)
+            if isinstance(message, OpasUserMessage)
+            and isinstance(message.content, list)
+        ]
+        await asyncio.gather(*tasks)
         return messages
 
     async def run_chat(
