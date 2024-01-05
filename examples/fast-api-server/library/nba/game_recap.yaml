@@ -15,6 +15,7 @@ parameters:
       - team
 type: DuckDBQueryFunction
 dataset: 'dummy-data/'
+data_table_output: False
 sqls:
   - |
     SELECT date,home_team,away_team,home_team_abbr,away_team_abbr,home_team_winner,away_team_winner,home_team_score,away_team_score,venue,location,home_team_overall_record,away_team_overall_record,
