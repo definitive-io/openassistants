@@ -4,14 +4,14 @@ from typing import Dict, List, TypedDict
 from langchain.chat_models.base import BaseChatModel
 from langchain.schema.messages import HumanMessage
 from openassistants.data_models.chat_messages import OpasMessage
-from openassistants.functions.base import IBaseFunction, IEntity
+from openassistants.functions.base import IEntity, IFunction
 from openassistants.llm_function_calling.utils import (
     build_chat_history_prompt,
     generate_to_json,
 )
 
 
-async def generate_argument_decisions_schema(function: IBaseFunction):
+async def generate_argument_decisions_schema(function: IFunction):
     # Start with the base schema
     json_schema = function.get_parameters_json_schema()
 
@@ -50,7 +50,7 @@ ArgumentDecisionDict = Dict[str, NestedObject]
 
 
 async def generate_argument_decisions(
-    function: IBaseFunction,
+    function: IFunction,
     chat: BaseChatModel,
     user_query: str,
     chat_history: List[OpasMessage],
@@ -93,7 +93,7 @@ def entity_to_json_schema_obj(entity: IEntity):
 
 
 async def generate_arguments(
-    function: IBaseFunction,
+    function: IFunction,
     chat: BaseChatModel,
     user_query: str,
     chat_history: List[OpasMessage],

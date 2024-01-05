@@ -4,14 +4,14 @@ from openassistants.data_models.function_output import FunctionOutput, TextOutpu
 from openassistants.functions.base import (
     BaseFunction,
     FunctionExecutionDependency,
-    IBaseFunction,
+    IFunction,
 )
 from openassistants.functions.utils import AsyncStreamVersion
 
 
 class IndexFunction(BaseFunction):
     type: Literal["IndexFunction"] = "IndexFunction"
-    functions: Callable[[], Awaitable[List[IBaseFunction]]]
+    functions: Callable[[], Awaitable[List[IFunction]]]
 
     async def execute(
         self, deps: FunctionExecutionDependency
