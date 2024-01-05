@@ -28,6 +28,7 @@ from openassistants.llm_function_calling.infilling import (
 from openassistants.llm_function_calling.selection import select_function
 from openassistants.utils.async_utils import AsyncStreamVersion
 from openassistants.utils.langchain_util import LangChainCachedEmbeddings
+from openassistants.utils.vision import image_url_to_text
 
 
 class Assistant:
@@ -48,6 +49,7 @@ class Assistant:
         function_infilling: Optional[BaseChatModel] = None,
         function_summarization: Optional[BaseChatModel] = None,
         function_fallback: Optional[BaseChatModel] = None,
+        vision_model: Optional[BaseChatModel] = None,
         entity_embedding_model: Optional[Embeddings] = None,
         scope_description: str = "General assistant.",
         add_index: bool = True,
@@ -64,6 +66,9 @@ class Assistant:
         )
         self.function_fallback = function_fallback or ChatOpenAI(
             model="gpt-4-1106-preview", temperature=0.2, max_tokens=1024
+        )
+        self.vision_model = vision_model or ChatOpenAI(
+            model="gpt-4-vision-preview", temperature=0.2, max_tokens=1024
         )
         self.scope_description = scope_description
 
@@ -319,6 +324,39 @@ class Assistant:
         ):
             yield version
 
+    async def convert_list_message(self, messages, message, idx):
+        text_context = " ".join(
+            content["text"]
+            for content in message.content
+            if content.get("type") == "text"
+        )
+        for i, content in enumerate(message.content):
+            if isinstance(content, dict) and content.get("type") == "image_url":
+                image_description = "Image described as {}".format(content["filename"])
+                if self.vision_model is not None and idx == len(messages) - 1:
+                    image_description = image_url_to_text(
+                        vision_model=self.vision_model,
+                        image_url=content["image_url"],
+                        text_context=text_context,
+                    )
+                message.content[i] = {
+                    "type": "text",
+                    "text": image_description,
+                }
+        message.content = " ".join(
+            piece["text"] for piece in message.content if piece.get("type") == "text"
+        )
+
+    async def pre_process_messages(self, messages):
+        tasks = [
+            self.convert_list_message(messages, message, idx)
+            for idx, message in enumerate(messages)
+            if isinstance(message, OpasUserMessage)
+            and isinstance(message.content, list)
+        ]
+        await asyncio.gather(*tasks)
+        return messages
+
     async def run_chat(
         self,
         messages: List[OpasMessage],
@@ -326,6 +364,8 @@ class Assistant:
         force_select_function: Optional[str] = None,
     ) -> AsyncStreamVersion[List[OpasMessage]]:
         last_message = messages[-1]
+
+        messages = await self.pre_process_messages(messages)
 
         dependencies = {
             "chat_history": messages,

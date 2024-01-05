@@ -19,7 +19,10 @@ const InputRequestArgumentZod = FunctionCallArgumentZod.extend({
 
 const UserMessageZod = BaseMessageZod.extend({
   role: z.literal('user'),
-  content: z.string().optional(),
+  content: z.union([
+    z.string(),
+    z.array(z.object({}).passthrough()),
+  ]).optional(),
   input_response: FunctionCallArgumentZod.optional(),
 });
 

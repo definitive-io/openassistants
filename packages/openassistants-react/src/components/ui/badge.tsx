@@ -1,9 +1,18 @@
 import * as React from 'react';
 import { cva, VariantProps } from 'class-variance-authority';
+import { ConfigVariants } from '../../lib/cva-utils';
+import type { ClassProp } from "class-variance-authority/dist/types";
 
 import { cn } from '../../lib/utils';
 
-const badgeVariants = cva(
+const badgeVariants: (props?: (ConfigVariants<{
+  variant: {
+      default: string;
+      secondary: string;
+      destructive: string;
+      outline: string;
+  };
+}> & ClassProp) | undefined) => string = cva(
   'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
   {
     variants: {
