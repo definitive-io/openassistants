@@ -8,7 +8,7 @@ import { Message } from './chat-models';
 export interface ChatPanelProps {
   isLoading: boolean;
   stop: () => void;
-  append: (value: string) => Promise<void>;
+  append: (value: string | {}[]) => Promise<void>;
   messages: Message[];
   onSave?: () => Promise<void>;
   saveDisabled: boolean;

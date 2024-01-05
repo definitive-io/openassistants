@@ -28,6 +28,7 @@ from openassistants.llm_function_calling.infilling import (
 from openassistants.llm_function_calling.selection import select_function
 from openassistants.utils.async_utils import AsyncStreamVersion
 from openassistants.utils.langchain_util import LangChainCachedEmbeddings
+from openassistants.utils.vision import image_url_to_text
 
 
 class Assistant:
@@ -48,6 +49,7 @@ class Assistant:
         function_infilling: Optional[BaseChatModel] = None,
         function_summarization: Optional[BaseChatModel] = None,
         function_fallback: Optional[BaseChatModel] = None,
+        vision_model: Optional[BaseChatModel] = None,
         entity_embedding_model: Optional[Embeddings] = None,
         scope_description: str = "General assistant.",
         add_index: bool = True,
@@ -64,6 +66,9 @@ class Assistant:
         )
         self.function_fallback = function_fallback or ChatOpenAI(
             model="gpt-4-1106-preview", temperature=0.2, max_tokens=1024
+        )
+        self.vision_model = vision_model or ChatOpenAI(
+            model="gpt-4-vision-preview", temperature=0.2, max_tokens=1024
         )
         self.scope_description = scope_description
 
@@ -319,6 +324,50 @@ class Assistant:
         ):
             yield version
 
+    async def pre_process_messages(self, messages):
+        last_message = messages[-1]
+
+        # Vision preprocessing
+        if self.vision_model is not None:
+            # Handle last message if it is a user message
+            # with a content list that contains
+            # a type: image_url message, convert it to a
+            # regular message with the image_url
+            # replaced by analyzed image data as text.
+            if isinstance(last_message, OpasUserMessage):
+                if isinstance(last_message.content, list):
+                    # Extract text from all text type messages for context
+                    text_context = " ".join(
+                        content["text"]
+                        for content in last_message.content
+                        if content.get("type") == "text"
+                    )
+                    # Loop over the content list and find any image_url messages
+                    for i, content in enumerate(last_message.content):
+                        if (
+                            isinstance(content, dict)
+                            and content.get("type") == "image_url"
+                        ):
+                            # Replace the image_url with the analyzed image data
+                            last_message.content[i] = {
+                                "type": "text",
+                                "text": image_url_to_text(
+                                    vision_model=self.vision_model,
+                                    image_url=content["image_url"],
+                                    text_context=text_context,
+                                ),
+                            }
+                    # Collapse the content list into a single string
+                    last_message.content = " ".join(
+                        [
+                            piece["text"]
+                            for piece in last_message.content
+                            if piece.get("type") == "text"
+                        ]
+                    )
+
+        return messages
+
     async def run_chat(
         self,
         messages: List[OpasMessage],
@@ -326,6 +375,8 @@ class Assistant:
         force_select_function: Optional[str] = None,
     ) -> AsyncStreamVersion[List[OpasMessage]]:
         last_message = messages[-1]
+
+        messages = await self.pre_process_messages(messages)
 
         dependencies = {
             "chat_history": messages,

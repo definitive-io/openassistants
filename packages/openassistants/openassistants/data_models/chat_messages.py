@@ -1,14 +1,15 @@
-from typing import Annotated, List, Literal, Optional
+from typing import Annotated, Dict, List, Literal, Optional, Union
 
 from langchain.schema.messages import BaseMessage, merge_content
+from pydantic import BaseModel, Field
+
 from openassistants.data_models.function_input import FunctionCall, FunctionInputRequest
 from openassistants.data_models.function_output import FunctionOutput
-from pydantic import BaseModel, Field
 
 
 class OpasUserMessage(BaseModel):
     role: Literal["user"] = "user"
-    content: str
+    content: Union[str, List[Union[str, Dict]]]
     input_response: Optional[FunctionCall] = Field(
         default=None,
         description="the user's response to an input request. "

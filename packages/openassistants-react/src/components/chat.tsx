@@ -59,7 +59,7 @@ export function OpenAssistantsChat({
     stop();
   };
 
-  const appendMessageValue = async (value?: string): Promise<void> => {
+  const appendMessageValue = async (value?: string | {}[]): Promise<void> => {
     await append({
       role: 'user',
       content: value,

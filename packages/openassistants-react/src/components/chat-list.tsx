@@ -3,7 +3,7 @@ import { Message } from './chat-models';
 import React from 'react';
 import { DataframeTable } from './dataframe-table';
 import { IconSpinner, Separator } from './ui';
-import { OpenAssistantsChatMessage, getContent } from './chat-message';
+import { OpenAssistantsChatMessage } from './chat-message';
 import { RenderVisMessage } from './plotly-vis';
 
 export interface DefinitiveChatList {

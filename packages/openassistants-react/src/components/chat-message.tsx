@@ -39,19 +39,24 @@ const isCollapsable = (message: Message): boolean => {
   );
 };
 
-export const getContent = (message: Message): string => {
-  if (message.role === 'user') {
-    if (message.content) {
-      return message.content;
+function flattenMessageContent(message: Message): string {
+  if("content" in message) {
+    if(Array.isArray(message.content)) {
+      let result = '';
+      message.content.forEach((entry) => {
+        if (entry.type === 'text') {
+          result += entry.text + '\n';
+        } else if (entry.type === 'image_url' && entry.filename) {
+          result += 'File: "' + entry.filename + '"\n\n';
+        }
+      });
+      return result.trim();
     } else {
-      return '';
+      return message.content?.trim() || "";
     }
   }
-  if (message.role === 'assistant' && message.content) {
-    return message.content;
-  }
-  return '';
-};
+  return ""
+}
 
 export function OpenAssistantsChatMessage({
   index,
@@ -165,13 +170,13 @@ export function OpenAssistantsChatMessage({
               })}
             {'content' in message && !submitted && (
               <div>
-                <ChatContent content={message.content?.trim() || ''} />
+                <ChatContent content={flattenMessageContent(message)} />
                 <ChatMessageActions
-                  content={message.content}
+                  content={flattenMessageContent(message)}
                   actions={supportedActions}
                   onEditClicked={() => {
                     setIsEditing(true);
-                    setEditedMessageContent(message.content || '');
+                    setEditedMessageContent(flattenMessageContent(message));
                   }}
                 />
               </div>
