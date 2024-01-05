@@ -138,7 +138,9 @@ export const useDefinitiveChat = (
   };
   const setMessagesAndReload = async (messages: Message[]) => {
     setMessages(messages);
-    setReloadFlag(true);
+    if(messages.length > 0) {
+      setReloadFlag(true);
+    }
   };
 
   useEffect(() => {

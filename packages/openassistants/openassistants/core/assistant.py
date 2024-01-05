@@ -324,48 +324,35 @@ class Assistant:
         ):
             yield version
 
+    async def convert_list_message(self, messages, message, idx):
+        text_context = " ".join(
+            content["text"]
+            for content in message.content
+            if content.get("type") == "text"
+        )
+        for i, content in enumerate(message.content):
+            if isinstance(content, dict) and content.get("type") == "image_url":
+                image_description = "Image described as {}".format(content["filename"])
+                if self.vision_model is not None and idx == len(messages) - 1:
+                    image_description = image_url_to_text(
+                        vision_model=self.vision_model,
+                        image_url=content["image_url"],
+                        text_context=text_context,
+                    )
+                message.content[i] = {
+                    "type": "text",
+                    "text": image_description,
+                }
+        message.content = " ".join(
+            piece["text"] for piece in message.content if piece.get("type") == "text"
+        )
+
     async def pre_process_messages(self, messages):
-        last_message = messages[-1]
-
-        # Vision preprocessing
-        if self.vision_model is not None:
-            # Handle last message if it is a user message
-            # with a content list that contains
-            # a type: image_url message, convert it to a
-            # regular message with the image_url
-            # replaced by analyzed image data as text.
-            if isinstance(last_message, OpasUserMessage):
-                if isinstance(last_message.content, list):
-                    # Extract text from all text type messages for context
-                    text_context = " ".join(
-                        content["text"]
-                        for content in last_message.content
-                        if content.get("type") == "text"
-                    )
-                    # Loop over the content list and find any image_url messages
-                    for i, content in enumerate(last_message.content):
-                        if (
-                            isinstance(content, dict)
-                            and content.get("type") == "image_url"
-                        ):
-                            # Replace the image_url with the analyzed image data
-                            last_message.content[i] = {
-                                "type": "text",
-                                "text": image_url_to_text(
-                                    vision_model=self.vision_model,
-                                    image_url=content["image_url"],
-                                    text_context=text_context,
-                                ),
-                            }
-                    # Collapse the content list into a single string
-                    last_message.content = " ".join(
-                        [
-                            piece["text"]
-                            for piece in last_message.content
-                            if piece.get("type") == "text"
-                        ]
-                    )
-
+        for idx, message in enumerate(messages):
+            if isinstance(message, OpasUserMessage) and isinstance(
+                message.content, list
+            ):
+                self.convert_list_message(messages, message, idx)
         return messages
 
     async def run_chat(
