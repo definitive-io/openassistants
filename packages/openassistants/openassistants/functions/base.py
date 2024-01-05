@@ -35,7 +35,7 @@ class IEntityConfig(abc.ABC):
         pass
 
 
-class IBaseFunction(abc.ABC):
+class IFunction(abc.ABC):
     @abc.abstractmethod
     def get_id(self) -> str:
         pass
@@ -125,7 +125,7 @@ class BaseFunctionParameters(BaseModel):
     json_schema: JSONSchema = EMPTY_JSON_SCHEMA
 
 
-class BaseFunction(IBaseFunction, BaseModel, abc.ABC):
+class BaseFunction(IFunction, BaseModel, abc.ABC):
     id: str
     type: str
     display_name: Optional[str] = None
@@ -157,3 +157,9 @@ class BaseFunction(IBaseFunction, BaseModel, abc.ABC):
 
     async def get_entity_configs(self) -> Mapping[str, IEntityConfig]:
         return {}
+
+
+class IFunctionLibrary(abc.ABC):
+    @abc.abstractmethod
+    async def get_all_functions(self) -> Sequence[IFunction]:
+        pass

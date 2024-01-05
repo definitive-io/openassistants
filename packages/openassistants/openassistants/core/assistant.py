@@ -15,10 +15,11 @@ from openassistants.data_models.chat_messages import (
 from openassistants.data_models.function_input import FunctionCall, FunctionInputRequest
 from openassistants.functions.base import (
     FunctionExecutionDependency,
-    IBaseFunction,
     IEntity,
+    IFunction,
+    IFunctionLibrary,
 )
-from openassistants.functions.crud import FunctionCRUD, LocalCRUD, PythonCRUD
+from openassistants.functions.crud import LocalFunctionLibrary, PythonLibrary
 from openassistants.llm_function_calling.entity_resolution import resolve_entities
 from openassistants.llm_function_calling.fallback import perform_general_qa
 from openassistants.llm_function_calling.infilling import (
@@ -36,14 +37,14 @@ class Assistant:
     function_summarization: BaseChatModel
     function_fallback: BaseChatModel
     entity_embedding_model: Embeddings
-    function_libraries: List[FunctionCRUD]
+    function_libraries: List[IFunctionLibrary]
     scope_description: str
 
-    _cached_all_functions: List[IBaseFunction]
+    _cached_all_functions: List[IFunction]
 
     def __init__(
         self,
-        libraries: List[str | FunctionCRUD],
+        libraries: List[str | IFunctionLibrary],
         function_identification: Optional[BaseChatModel] = None,
         function_infilling: Optional[BaseChatModel] = None,
         function_summarization: Optional[BaseChatModel] = None,
@@ -71,12 +72,14 @@ class Assistant:
             entity_embedding_model or LangChainCachedEmbeddings(OpenAIEmbeddings())
         )
         self.function_libraries = [
-            library if isinstance(library, FunctionCRUD) else LocalCRUD(library)
+            library
+            if isinstance(library, IFunctionLibrary)
+            else LocalFunctionLibrary(library)
             for library in libraries
         ]
 
         if add_index:
-            index_func: IBaseFunction = IndexFunction(
+            index_func: IFunction = IndexFunction(
                 id="index",
                 display_name="List functions",
                 description=(
@@ -91,19 +94,19 @@ class Assistant:
                 functions=self.get_all_functions,
             )
 
-            self.function_libraries.append(PythonCRUD(functions=[index_func]))
+            self.function_libraries.append(PythonLibrary(functions=[index_func]))
 
         self._cached_all_functions = []
 
-    async def get_all_functions(self) -> List[IBaseFunction]:
+    async def get_all_functions(self) -> List[IFunction]:
         if not self._cached_all_functions:
-            functions = []
+            functions: List[IFunction] = []
             for library in self.function_libraries:
-                functions.extend(await library.aread_all())
+                functions.extend(await library.get_all_functions())
             self._cached_all_functions = functions
         return self._cached_all_functions
 
-    async def get_function_by_id(self, function_id: str) -> Optional[IBaseFunction]:
+    async def get_function_by_id(self, function_id: str) -> Optional[IFunction]:
         functions = await self.get_all_functions()
         for function in functions:
             if function.get_id() == function_id:
@@ -112,7 +115,7 @@ class Assistant:
 
     async def execute_function(
         self,
-        function: IBaseFunction,
+        function: IFunction,
         func_args: Dict[str, Any],
         dependencies: Dict[str, Any],
     ):
@@ -138,7 +141,7 @@ class Assistant:
         self,
         dependencies: dict,
         message: OpasUserMessage,
-        selected_function: IBaseFunction,
+        selected_function: IFunction,
         args_json_schema: dict,
         entities_info: Dict[str, List[IEntity]],
     ) -> Tuple[bool, dict]:
@@ -194,12 +197,12 @@ class Assistant:
     async def handle_user_plaintext(
         self,
         message: OpasUserMessage,
-        all_functions: List[IBaseFunction],
+        all_functions: List[IFunction],
         dependencies: Dict[str, Any],
         autorun: bool,
         force_select_function: Optional[str],
     ) -> AsyncStreamVersion[List[OpasMessage]]:
-        selected_function: Optional[IBaseFunction] = None
+        selected_function: Optional[IFunction] = None
         # perform entity resolution
         chat_history: List[OpasMessage] = dependencies.get("chat_history")  # type: ignore
 
@@ -299,13 +302,13 @@ class Assistant:
     async def handle_user_input(
         self,
         message: OpasUserMessage,
-        all_functions: List[IBaseFunction],
+        all_functions: List[IFunction],
         dependencies: Dict[str, Any],
     ) -> AsyncStreamVersion[List[OpasMessage]]:
         if message.input_response is None:
             raise ValueError("message must have input_response")
 
-        selected_function: Optional[IBaseFunction] = None
+        selected_function: Optional[IFunction] = None
 
         for f in all_functions:
             if f.get_id() == message.input_response.name:

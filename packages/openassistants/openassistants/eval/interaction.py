@@ -12,7 +12,7 @@ from openassistants.data_models.chat_messages import (
 )
 from openassistants.data_models.function_input import FunctionCall
 from openassistants.data_models.function_output import DataFrameOutput, TextOutput
-from openassistants.functions.base import IBaseFunction
+from openassistants.functions.base import IFunction
 from openassistants.utils.async_utils import last_value
 from pydantic import BaseModel, ConfigDict
 
@@ -88,7 +88,7 @@ class FunctionInteraction(FunctionInteractionNode):
     async def get_function(
         self,
         assistant: Assistant,
-    ) -> IBaseFunction:
+    ) -> IFunction:
         base_function = await assistant.get_function_by_id(self.function)
         if base_function is None:
             raise ValueError("Function not found")
@@ -159,7 +159,7 @@ class FunctionInteractionResponseNode(BaseModel):
     user_input_response: OpasUserMessage
     assistant_function_invocation: OpasAssistantMessage
     function_response: OpasFunctionMessage
-    function_spec: IBaseFunction
+    function_spec: IFunction
 
 
 class FunctionInteractionResponse(FunctionInteractionResponseNode):

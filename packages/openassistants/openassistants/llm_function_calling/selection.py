@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from langchain.chat_models.base import BaseChatModel
 from langchain.schema.messages import HumanMessage
-from openassistants.functions.base import IBaseFunction
+from openassistants.functions.base import IFunction
 from openassistants.llm_function_calling.utils import (
     chunk_list_by_max_size,
     generate_to_json,
@@ -12,7 +12,7 @@ from pydantic import BaseModel, InstanceOf
 
 
 async def filter_functions(
-    chat: BaseChatModel, functions: List[IBaseFunction], user_query: str
+    chat: BaseChatModel, functions: List[IFunction], user_query: str
 ) -> Optional[str]:
     functions_text = "\n".join([f.get_signature() for f in functions])
     json_schema = {
@@ -44,13 +44,13 @@ Respond in JSON.
 
 
 class SelectFunctionResult(BaseModel):
-    function: Optional[InstanceOf[IBaseFunction]] = None
-    suggested_functions: Optional[List[InstanceOf[IBaseFunction]]] = None
+    function: Optional[InstanceOf[IFunction]] = None
+    suggested_functions: Optional[List[InstanceOf[IFunction]]] = None
 
 
 async def select_function(
     chat: BaseChatModel,
-    functions: List[IBaseFunction],
+    functions: List[IFunction],
     user_query: str,
     chunk_size: int = 4,
 ) -> SelectFunctionResult:

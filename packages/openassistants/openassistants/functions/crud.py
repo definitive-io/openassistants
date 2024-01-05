@@ -29,7 +29,8 @@ from openassistants.data_models.json_schema import JSONSchema
 from openassistants.functions.base import (
     BaseFunction,
     BaseFunctionParameters,
-    IBaseFunction,
+    IFunction,
+    IFunctionLibrary,
 )
 from openassistants.utils import yaml as yaml_utils
 from pydantic import Field, TypeAdapter
@@ -46,27 +47,32 @@ AllFunctionTypes = Annotated[
 ]
 
 
-class FunctionCRUD(abc.ABC):
+class BaseFileLibrary(IFunctionLibrary, abc.ABC):
     @abc.abstractmethod
-    def read(self, slug: str) -> Optional[IBaseFunction]:
+    def read(self, slug: str) -> Optional[IFunction]:
         pass
 
     @abc.abstractmethod
     def list_ids(self) -> List[str]:
         pass
 
-    async def aread(self, function_id: str) -> Optional[IBaseFunction]:
+    async def aread(self, function_id: str) -> Optional[IFunction]:
         return await run_in_threadpool(self.read, function_id)
 
     async def alist_ids(self) -> List[str]:
         return await run_in_threadpool(self.list_ids)
 
-    async def aread_all(self) -> List[IBaseFunction]:
+    async def get_all_functions(self) -> Sequence[IFunction]:
         ids = await self.alist_ids()
-        return await asyncio.gather(*[self.aread(f_id) for f_id in ids])  # type: ignore
+        funcs: List[IFunction | None] = await asyncio.gather(  # type: ignore
+            *[self.aread(f_id) for f_id in ids]
+        )
+        if None in funcs:
+            raise RuntimeError("Failed to load all functions")
+        return funcs  # type: ignore
 
 
-class LocalCRUD(FunctionCRUD):
+class LocalFunctionLibrary(BaseFileLibrary):
     def __init__(self, library_id: str, directory: str = "library"):
         self.library_id = library_id
         self.directory = Path(directory) / library_id
@@ -84,32 +90,21 @@ class LocalCRUD(FunctionCRUD):
         except Exception as e:
             raise RuntimeError(f"Failed to load: {function_id}") from e
 
-    async def aread_all(self) -> List[IBaseFunction]:
-        ids = self.list_ids()
-        return [self.read(f_id) for f_id in ids]  # type: ignore
-
     def list_ids(self) -> List[str]:
         return [
             file.stem for file in self.directory.iterdir() if file.suffix == ".yaml"
         ]
 
 
-class PythonCRUD(FunctionCRUD):
-    def __init__(self, functions: Sequence[IBaseFunction]):
+class PythonLibrary(IFunctionLibrary):
+    def __init__(self, functions: Sequence[IFunction]):
         self.functions = functions
 
-    def read(self, slug: str) -> Optional[IBaseFunction]:
-        for function in self.functions:
-            if function.get_id() == slug:
-                return function
-
-        return None
-
-    def list_ids(self) -> List[str]:
-        return [function.get_id() for function in self.functions]
+    async def get_all_functions(self) -> Sequence[IFunction]:
+        return self.functions
 
 
-class OpenAPICRUD(PythonCRUD):
+class OpenAPILibrary(PythonLibrary):
     openapi: OpenAPISpec
 
     @staticmethod
@@ -169,6 +164,6 @@ class OpenAPICRUD(PythonCRUD):
             self.openapi.servers[0].url = base_url
 
         openai_functions = openapi_spec_to_openai_fn(self.openapi)
-        functions = OpenAPICRUD.openai_fns_to_openapi_function(openai_functions)
+        functions = OpenAPILibrary.openai_fns_to_openapi_function(openai_functions)
 
         super().__init__(functions)
