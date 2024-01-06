@@ -7,9 +7,9 @@ from langchain.schema import Document
 from langchain.vectorstores.usearch import USearch
 from openassistants.data_models.chat_messages import OpasMessage
 from openassistants.functions.base import (
-    IBaseFunction,
     IEntity,
     IEntityConfig,
+    IFunction,
 )
 from openassistants.llm_function_calling.infilling import generate_arguments
 
@@ -64,7 +64,7 @@ async def _get_entities(
 
 
 async def resolve_entities(
-    function: IBaseFunction,
+    function: IFunction,
     function_infilling_llm: BaseChatModel,
     embeddings: Embeddings,
     user_query: str,

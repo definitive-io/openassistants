@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.storage import RedisStore
 from openassistants.core.assistant import Assistant
-from openassistants.functions.crud import OpenAPICRUD, PythonCRUD
+from openassistants.functions.crud import OpenAPILibrary, PythonLibrary
 from openassistants.utils.langchain_util import LangChainCachedEmbeddings
 from openassistants_fastapi import RouteAssistants, create_router
 
@@ -15,9 +15,9 @@ app = FastAPI()
 
 
 # create a library with the custom function
-custom_python_lib = PythonCRUD(functions=[find_email_by_name_function])
+custom_python_lib = PythonLibrary(functions=[find_email_by_name_function])
 
-openapi_lib = OpenAPICRUD(
+openapi_lib = OpenAPILibrary(
     spec="https://petstore3.swagger.io/api/v3/openapi.json",
     base_url="https://petstore3.swagger.io/api/v3",
 )
