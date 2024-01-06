@@ -1,0 +1,32 @@
+[
+  {
+    "name": "image_id",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Unique identifier for each image"
+  },
+  {
+    "name": "num_dogs",
+    "type": "INT64",
+    "mode": "REQUIRED",
+    "description": "Number of dogs present in the image"
+  },
+  {
+    "name": "dog_color",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "The primary color of the dog(s); 'multi' if multiple colors are present"
+  },
+  {
+    "name": "dog_position",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "The position of the dog(s); 'multi' if multiple positions are present"
+  },
+  {
+    "name": "background_color",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "The predominant background color of the image"
+  }
+]
