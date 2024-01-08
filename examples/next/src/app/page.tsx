@@ -16,8 +16,12 @@ export default function Home() {
                 prompt: 'Recap the Warriors game',
               },
               {
-                title: 'Recap the Bucks game',
-                prompt: 'Recap the Bucks game',
+                title: 'Recap the Nuggets game',
+                prompt: 'Recap the Nuggets game',
+              },
+              {
+                title: 'Recap the Lakers game',
+                prompt: 'Recap the Lakers game',
               },
             ]}
             welcomeMessage="Stay updated with last night's NBA games! This application offers concise recaps, focusing on team statistics and key player performances to summarize the game's results."
