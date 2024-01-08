@@ -4,7 +4,6 @@ import json
 from json.decoder import JSONDecodeError
 from pathlib import Path
 from typing import (
-    Annotated,
     Any,
     Callable,
     Dict,
@@ -17,34 +16,17 @@ from typing import (
 
 from langchain.chains.openai_functions.openapi import openapi_spec_to_openai_fn
 from langchain_community.utilities.openapi import OpenAPISpec
-from openassistants.contrib.advisor_function import AdvisorFunction
-from openassistants.contrib.duckdb_query import DuckDBQueryFunction
-from openassistants.contrib.langchain_ddg_tool import DuckDuckGoToolFunction
 from openassistants.contrib.python_callable import PythonCallableFunction
-from openassistants.contrib.python_eval import PythonEvalFunction
-from openassistants.contrib.sqlalchemy_query import QueryFunction
-from openassistants.contrib.text_response import TextResponseFunction
 from openassistants.data_models.function_output import TextOutput
 from openassistants.data_models.json_schema import JSONSchema
 from openassistants.functions.base import (
-    BaseFunction,
     BaseFunctionParameters,
     IFunction,
     IFunctionLibrary,
 )
 from openassistants.utils import yaml as yaml_utils
-from pydantic import Field, TypeAdapter
+from pydantic import TypeAdapter
 from starlette.concurrency import run_in_threadpool
-
-AllFunctionTypes = Annotated[
-    QueryFunction
-    | DuckDBQueryFunction
-    | PythonEvalFunction
-    | DuckDuckGoToolFunction
-    | TextResponseFunction
-    | AdvisorFunction,
-    Field(json_schema_extra={"discriminator": "type"}),
-]
 
 
 class BaseFileLibrary(IFunctionLibrary, abc.ABC):
@@ -72,19 +54,23 @@ class BaseFileLibrary(IFunctionLibrary, abc.ABC):
         return funcs  # type: ignore
 
 
-class LocalFunctionLibrary(BaseFileLibrary):
-    def __init__(self, library_id: str, directory: str = "library"):
+class LocalYAMLLibrary(BaseFileLibrary):
+    def __init__(
+        self,
+        library_id: str,
+        model_parser: Callable[[dict], IFunction],
+        directory: str = "library",
+    ):
         self.library_id = library_id
+        self.model_parser = model_parser
         self.directory = Path(directory) / library_id
 
-    def read(self, function_id: str) -> Optional[BaseFunction]:
+    def read(self, function_id: str) -> Optional[IFunction]:
         try:
             if (yaml_file := self.directory / f"{function_id}.yaml").exists():
                 with yaml_file.open() as f:
-                    parsed_yaml = yaml_utils.load(f)
-                return TypeAdapter(AllFunctionTypes).validate_python(
-                    parsed_yaml | {"id": function_id}
-                )  # type: ignore
+                    yaml_dict = yaml_utils.load(f)
+                return self.model_parser(yaml_dict | {"id": function_id})
             else:
                 return None
         except Exception as e:
