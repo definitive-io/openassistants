@@ -19,7 +19,7 @@ from openassistants.functions.base import (
     IFunction,
     IFunctionLibrary,
 )
-from openassistants.functions.crud import LocalFunctionLibrary, PythonLibrary
+from openassistants.functions.crud import PythonLibrary
 from openassistants.llm_function_calling.entity_resolution import resolve_entities
 from openassistants.llm_function_calling.fallback import perform_general_qa
 from openassistants.llm_function_calling.infilling import (
@@ -45,7 +45,7 @@ class Assistant:
 
     def __init__(
         self,
-        libraries: List[str | IFunctionLibrary],
+        libraries: List[IFunctionLibrary],
         function_identification: Optional[BaseChatModel] = None,
         function_infilling: Optional[BaseChatModel] = None,
         function_summarization: Optional[BaseChatModel] = None,
@@ -76,12 +76,7 @@ class Assistant:
         self.entity_embedding_model = (
             entity_embedding_model or LangChainCachedEmbeddings(OpenAIEmbeddings())
         )
-        self.function_libraries = [
-            library
-            if isinstance(library, IFunctionLibrary)
-            else LocalFunctionLibrary(library)
-            for library in libraries
-        ]
+        self.function_libraries = libraries
 
         if add_index:
             index_func: IFunction = IndexFunction(
