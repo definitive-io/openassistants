@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "definitive-openassistants-fastapi"
-version = "0.0.4"
+version = "0.0.10"
 description = ""
 authors = ["Rick Lamers <ricklamers@gmail.com>"]
 readme = "README.md"
