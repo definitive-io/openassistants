@@ -71,13 +71,12 @@ class IFunction(abc.ABC):
         # convert JSON Schema types to Python types signature
         params_repr = PyRepr.repr_json_schema(self.get_parameters_json_schema())
 
-        sample_question_text = "\n".join(f"* {q}" for q in self.get_sample_questions())
-
         documentation = f"""\
 {self.get_description()}
-Example Questions:
-{sample_question_text}
 """
+
+        if len(self.get_sample_questions()) > 0:
+            documentation += "\n".join(f"* {q}" for q in self.get_sample_questions())
 
         # Construct the function signature
         signature = f"""\
@@ -91,6 +90,13 @@ def {self.get_id()}({params_repr}) -> pd.DataFrame:
     @abc.abstractmethod
     async def get_entity_configs(self) -> Mapping[str, IEntityConfig]:
         pass
+
+    @abc.abstractmethod
+    def get_is_fallback(self) -> bool:
+        """
+        Whether this function is a fallback function.
+        Fallback functions are functions that are always available to be chosen if no other non-fallback functions are relevant.
+        """  # noqa: E501
 
     @abc.abstractmethod
     async def execute(
@@ -133,6 +139,7 @@ class BaseFunction(IFunction, BaseModel, abc.ABC):
     sample_questions: List[str] = []
     confirm: bool = False
     parameters: BaseFunctionParameters = BaseFunctionParameters()
+    is_fallback: bool = False
 
     def get_id(self) -> str:
         return self.id
@@ -157,6 +164,9 @@ class BaseFunction(IFunction, BaseModel, abc.ABC):
 
     async def get_entity_configs(self) -> Mapping[str, IEntityConfig]:
         return {}
+
+    def get_is_fallback(self) -> bool:
+        return self.is_fallback
 
 
 class IFunctionLibrary(abc.ABC):
