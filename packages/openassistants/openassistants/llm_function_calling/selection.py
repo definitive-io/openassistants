@@ -17,8 +17,13 @@ async def filter_functions(
     functions_text = "\n".join([f.get_signature() for f in functions])
     json_schema = {
         "type": "object",
-        "properties": {"function_name": {"type": "string"}},
+        "properties": {"function_name": {"$ref": "#/definitions/functions"}},
         "required": ["function_name"],
+        "definitions": {
+            "functions": {
+                "enum": [f.get_id() for f in functions],
+            }
+        },
     }
     messages = [
         HumanMessage(
@@ -54,7 +59,10 @@ async def select_function(
     user_query: str,
     chunk_size: int = 4,
 ) -> SelectFunctionResult:
-    subsets = chunk_list_by_max_size(functions, chunk_size)
+    non_fallbacks = [f for f in functions if not f.get_is_fallback()]
+    fallbacks = [f for f in functions if f.get_is_fallback()]
+
+    subsets = chunk_list_by_max_size(non_fallbacks, chunk_size)
 
     # Make LLM calls in parallel
     tasks = [
@@ -77,21 +85,39 @@ async def select_function(
     json_schema = {
         "type": "object",
         "properties": {
-            "function_name": {"type": "string"},
-            "suggested_function_names": {"type": "array", "items": {"type": "string"}},
+            "reason": {"type": "string"},
+            "function_name": {"$ref": "#/definitions/functions"},
+            "related_function_names": {
+                "type": "array",
+                "items": {"$ref": "#/definitions/functions"},
+            },
+        },
+        "definitions": {
+            "functions": {
+                "enum": [f.get_id() for f in selected_functions + fallbacks],
+            }
         },
     }
 
+    fallbacks_signatures = "\n".join([f.get_signature() for f in fallbacks])
+
     selection_messages = [
         HumanMessage(
-            content=f"""Prior selection reduced the candidates to these functions:
+            content=f"""\
+Prior selection reduced the candidates to these functions:
+
 {selected_functions_signatures}
+
+These fallback functions can be used when none of the above functions are a good match:
+
+{fallbacks_signatures}
 
 Scenario 1: There is a function in the list of candidates that is a match to the user query.
 Action: provide the name of the function as the 'function_name' argument.
 
 Scenario 2: None of the functions in the list of candidates match the user query.
-Action: select related functions from the list of candidates as the 'suggested_function_names' argument. You are also allowed to return an empty list of suggested functions if you think none of the functions are a good match.
+Action: select related functions from the list of candidates as the 'related_function_names' argument.
+You are also allowed to return an empty list of related functions if you think none of the functions are a good match.
 
 First decide which of the two scenarios is the case. Then take the appropriate action.
 
@@ -114,10 +140,12 @@ Respond in JSON.
     suggested_function_names = json_result.get("related_function_names", [])
 
     selected_function = next(
-        (f for f in selected_functions if f.get_id() == function_name), None
+        (f for f in selected_functions + fallbacks if f.get_id() == function_name), None
     )
     suggested_functions = [
-        f for f in selected_functions if f.get_id() in suggested_function_names
+        f
+        for f in selected_functions + fallbacks
+        if f.get_id() in suggested_function_names
     ] or None
 
     return SelectFunctionResult(
