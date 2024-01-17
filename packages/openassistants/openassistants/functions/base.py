@@ -76,7 +76,9 @@ class IFunction(abc.ABC):
 """
 
         if len(self.get_sample_questions()) > 0:
-            documentation += "\n".join(f"* {q}" for q in self.get_sample_questions())
+            documentation += "Example Questions:\n" + "\n".join(
+                f"* {q}" for q in self.get_sample_questions()
+            )
 
         # Construct the function signature
         signature = f"""\
