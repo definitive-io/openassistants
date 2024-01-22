@@ -9,7 +9,6 @@ readme = "README.md"
 python = ">=3.10,<3.12"
 definitive-openassistants = { path = "../../packages/openassistants", extras = ["duckdb", "duckduckgo", "sql"], develop = true }
 definitive-openassistants-fastapi = { path = "../../packages/openassistants-fastapi", develop = true }
-fastapi = "^0.104.1"
 uvicorn = "^0.24.0.post1"
 watchfiles = "^0.21.0"
 redis = "^5.0.1"
