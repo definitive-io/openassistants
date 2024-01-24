@@ -77,17 +77,29 @@ def chunk_list_by_max_size(lst, max_size):
     return [chunk.tolist() for chunk in np.array_split(lst, n)]
 
 
-def find_json_substring(s):
+def find_indexes_of_char(string: str, char: str):
+    return [index for index, c in enumerate(string) if c == char]
+
+
+def find_json_substring(s: str):
     start = s.find("{")
-    end = s.rfind("}") + 1
-    if start != -1 and end != -1:
-        return s[start:end]
-    return None
+
+    all_closing_brackets = find_indexes_of_char(s, "}")
+
+    for i in all_closing_brackets:
+        if i > start:
+            try:
+                json.loads(s[start : i + 1])
+                return s[start : i + 1]
+            except json.JSONDecodeError:
+                pass
+
+    raise ValueError(f"Could not find JSON substring in response content: {s}")
 
 
 async def generate_to_json(
     chat: BaseChatModel,
-    messages,
+    messages: list[BaseMessage],
     output_json_schema: Optional[dict],
     task_name: str,
     tags: Optional[list[str]] = None,
@@ -104,7 +116,7 @@ async def generate_to_json(
 
 
 async def generate_to_json_generic(
-    chat,
+    chat: BaseChatModel,
     messages: list[BaseMessage],
     output_json_schema: Optional[dict],
     tags: list[str],
@@ -122,7 +134,11 @@ async def generate_to_json_generic(
 
     messages = [system_message] + messages
     response = await chat.ainvoke(ensure_alternating(messages), {"tags": tags})
+    assert isinstance(response.content, str)
     content = response.content
+
+    # replace weird \_ escaping of underscores when using mixtral
+    content = content.replace(r"\_", "_")
 
     json_substring = find_json_substring(content)
     if json_substring is not None:

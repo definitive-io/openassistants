@@ -26,7 +26,10 @@ from openassistants.llm_function_calling.infilling import (
     generate_argument_decisions,
     generate_arguments,
 )
-from openassistants.llm_function_calling.selection import select_function
+from openassistants.llm_function_calling.selection import (
+    SelectFunctionResult,
+    select_function,
+)
 from openassistants.utils.async_utils import AsyncStreamVersion
 from openassistants.utils.langchain_util import LangChainCachedEmbeddings
 from openassistants.utils.vision import image_url_to_text
@@ -194,6 +197,25 @@ class Assistant:
 
         return complete, arguments
 
+    async def run_function_selection(
+        self,
+        chat_history: List[OpasMessage],
+    ) -> SelectFunctionResult:
+        all_functions = await self.get_all_functions()
+
+        last_message = chat_history[-1]
+
+        assert isinstance(last_message, OpasUserMessage)
+        assert isinstance(last_message.content, str)
+
+        select_function_result = await select_function(
+            self.function_identification,
+            all_functions,
+            last_message.content,
+        )
+
+        return select_function_result
+
     async def handle_user_plaintext(
         self,
         message: OpasUserMessage,
@@ -214,8 +236,8 @@ class Assistant:
             selected_function = filtered[0]
 
         if selected_function is None:
-            function_selection = await select_function(
-                self.function_identification, all_functions, message.content
+            function_selection = await self.run_function_selection(
+                chat_history=chat_history,
             )
 
             if function_selection.function:

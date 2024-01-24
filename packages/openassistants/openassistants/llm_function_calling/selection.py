@@ -74,7 +74,8 @@ async def select_function(
 
     # Ensure the selected function names are in the loaded signatures
     selected_functions = [f for f in functions if f.get_id() in function_names]
-    if not selected_functions:
+
+    if len(selected_functions) == 0 and len(fallbacks) == 0:
         return SelectFunctionResult()
 
     # Include the signatures of all the selected functions in the final evaluation
