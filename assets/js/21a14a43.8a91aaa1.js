@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[336],{7136:s=>{s.exports=JSON.parse('{"label":"agents","permalink":"/openassistants/blog/tags/agents","allTagsPath":"/openassistants/blog/tags","count":1,"unlisted":false}')}}]);

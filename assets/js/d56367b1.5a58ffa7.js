@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[628],{9780:s=>{s.exports=JSON.parse('{"label":"guardrails","permalink":"/openassistants/blog/tags/guardrails","allTagsPath":"/openassistants/blog/tags","count":1,"unlisted":false}')}}]);
